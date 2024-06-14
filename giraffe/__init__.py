@@ -1,1 +1,1 @@
-VERSION = '1.0'
+from .core.app import Giraffe
