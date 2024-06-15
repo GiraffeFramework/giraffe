@@ -1,14 +1,13 @@
 from typing import Union, Optional
 
-from http.server import BaseHTTPRequestHandler
-
+from .requests import RequestHandler
 from .templates import Template
 
 import json
 import os
 
 
-def response(request: BaseHTTPRequestHandler, content: str = '', status: int = 200) -> int:
+def response(request: RequestHandler, content: str = '', status: int = 200) -> int:
     if not content:
         status = 204
 
@@ -19,7 +18,7 @@ def response(request: BaseHTTPRequestHandler, content: str = '', status: int = 2
     return request.wfile.write(content.encode())
 
 
-def json_response(request: BaseHTTPRequestHandler, data: Union[dict, list], status: int = 200) -> int:
+def json_response(request: RequestHandler, data: Union[dict, list], status: int = 200) -> int:
     if not isinstance(data, dict) or not isinstance(data, list):
         raise TypeError('data must be a dict or a list')
     
@@ -35,7 +34,7 @@ def json_response(request: BaseHTTPRequestHandler, data: Union[dict, list], stat
     return request.wfile.write(json_data.encode())
 
 
-def render_response(request: BaseHTTPRequestHandler, template_name: str, context: Optional[dict]=None, status: int = 200) -> None:
+def html_response(request: RequestHandler, template_name: str, context: Optional[dict]=None, status: int = 200) -> int:
     path = os.path.join(request.server.root, 'templates', template_name)
 
     if not os.path.exists(path):

@@ -9,3 +9,5 @@ class Template:
     def substitute(self, context: Optional[dict]) -> str:
         if not context:
             return self._template
+        
+        return self._template

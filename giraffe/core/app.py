@@ -1,7 +1,6 @@
-from http.server import HTTPServer
-
 from .requests import RequestHandler
 from .routes import Routes
+from .server import GiraffeServer
 
 import sys
 import os
@@ -26,11 +25,11 @@ class Giraffe:
             raise ValueError('Invalid port')
 
         server_address = ('', self._port)
-        httpd = HTTPServer(server_address, RequestHandler)
+        httpd = GiraffeServer(server_address, RequestHandler)
 
-        httpd.get_routes = self._get_routes # type: ignore
-        httpd.post_routes = self._post_routes # type: ignore
-        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore
+        httpd.get_routes = self._get_routes
+        httpd.post_routes = self._post_routes
+        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore + rewrite
 
         print(f'Starting server {self._name} on http://127.0.0.1:{self._port}')
         
