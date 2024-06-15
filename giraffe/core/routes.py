@@ -8,7 +8,6 @@ class Routes:
         def decorator(func):
             if not path.startswith('/'):
                 full_path = '/' + path
-
             else:
                 full_path = path
 
@@ -16,10 +15,10 @@ class Routes:
 
             if 'GET' in methods:
                 self.get_routes[full_path] = func
-            
+
             if 'POST' in methods:
                 self.post_routes[full_path] = func
 
             return func
-        
+
         return decorator

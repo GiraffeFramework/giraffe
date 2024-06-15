@@ -1,33 +1,31 @@
-from http.server import BaseHTTPRequestHandler
-
 from typing import Union
 
+from http.server import BaseHTTPRequestHandler
 
-def response(content: str = '', status: int = 200) -> None:
+import json
+
+def response(request: BaseHTTPRequestHandler, content: str = '', status: int = 200) -> None:
     if not content:
         status = 204
 
-    # fix this shit
+    request.send_response(status)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
 
-    handler.send_response(status)
-    handler.send_header('Content-type', 'text/plain')
-    handler.end_headers()
-
-    handler.wfile.write(content.encode())
+    return request.wfile.write(content.encode())
 
 
-def json_response(data: Union[dict, list], status: int=200) -> None:
+def json_response(request: BaseHTTPRequestHandler, data: Union[dict, list], status: int = 200) -> None:
+    if not isinstance(data, dict) or not isinstance(data, list):
+        raise TypeError('data must be a dict or a list')
+    
     if not data:
         status = 204
 
-    handler = BaseHTTPRequestHandler()
+    request.send_response(status)
+    request.send_header('Content-type', 'application/json')
+    request.end_headers()
 
-    handler.send_response(code=status)
-    handler.send_header('Content-type', 'application/json')
-    handler.end_headers()
+    json_data = json.dumps(data)
 
-    return handler.wfile.write(content.encode())
-
-
-def render(template: str, status: int) -> None:
-    pass
+    return request.wfile.write(json_data.encode())

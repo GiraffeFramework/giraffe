@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in self.server.get_routes:
-            return self.server.get_routes[self.path]()
+            return self.server.get_routes[self.path](self)
 
         self.send_error(404, 'Not Found')
 
