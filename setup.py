@@ -8,19 +8,13 @@ setup(
         # List your project's dependencies here, e.g.,
         # 'somepackage>=1.0',
     ],
-    entry_points={
-        'console_scripts': [
-            # If you have any command-line scripts, you can define them here
-            # 'myframework=myframework.cli:main',
-        ],
-    },
     python_requires='>=3.6',
-    author='Your Name',
-    author_email='your.email@example.com',
-    description='A custom web framework',
+    author='Torben Petré (kipteamm)',
+    author_email='contact@kipteam.net',
+    description='A simple web framework',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/yourusername/myframework',
+    url='https://github.com/kipteamm/giraffe',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
