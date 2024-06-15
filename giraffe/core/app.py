@@ -30,7 +30,7 @@ class Giraffe:
 
         httpd.get_routes = self._get_routes # type: ignore
         httpd.post_routes = self._post_routes # type: ignore
-        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app')
+        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore
 
         print(f'Starting server {self._name} on http://127.0.0.1:{self._port}')
         

@@ -38,6 +38,9 @@ def json_response(request: BaseHTTPRequestHandler, data: Union[dict, list], stat
 def render_response(request: BaseHTTPRequestHandler, template_name: str, context: Optional[dict]=None, status: int = 200) -> None:
     path = os.path.join(request.server.root, 'templates', template_name)
 
+    if not os.path.exists(path):
+        raise FileNotFoundError(f'Template {template_name} not found')
+
     request.send_response(status)
     request.send_header('Content-type', 'text/html')
     request.end_headers()

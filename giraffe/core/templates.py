@@ -6,6 +6,6 @@ class Template:
         with open(path, 'r') as file:
             self._template = file.read()
 
-    def substitute(self, context: Optional[dict]):
+    def substitute(self, context: Optional[dict]) -> str:
         if not context:
             return self._template
