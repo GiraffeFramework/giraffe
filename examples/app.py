@@ -1,12 +1,10 @@
-from ..giraffe.core.responses import response, json_response, html_response, make_html
-from ..giraffe.core.routes import Routes
-from ..giraffe import Giraffe
+from giraffe.core.responses import response, json_response, html_response, make_html
+from giraffe.core.routes import Routes
+from giraffe import Giraffe
 
 app = Giraffe(__name__)
-
 routes = Routes()
 
-app.add_routes(routes)
 
 @routes.route('/')
 def text(request):
@@ -21,6 +19,9 @@ def json(request):
 @routes.route('/html')
 def html(request):
     return html_response(request, make_html('<h1>hello world</h1>'), 200)
+
+
+app.add_routes(routes)
 
 
 if __name__ == '__main__':
