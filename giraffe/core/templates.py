@@ -2,9 +2,13 @@ from typing import Optional
 
 
 class Template:
-    def __init__(self, path: str):
-        with open(path, 'r') as file:
-            self._template = file.read()
+    def __init__(self, template: str, is_file: bool=True):
+        if is_file:
+            with open(template, 'r') as file:
+                self._template = file.read()
+
+        else:
+            self._template = template
 
     def substitute(self, context: Optional[dict]) -> str:
         if not context:

@@ -34,16 +34,26 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
     return request.wfile.write(json_data.encode())
 
 
-def html_response(request: RequestHandler, template_name: str, context: Optional[dict]=None, status: int = 200) -> int:
-    path = os.path.join(request.server.root, 'templates', template_name)
+def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
+    if template.startswith('<%parsed%>'):
+        template = template[10:]
 
-    if not os.path.exists(path):
-        raise FileNotFoundError(f'Template {template_name} not found')
+        Template(template, False).substitute(context)
+    
+    else:
+        path = os.path.join(request.server.root, 'templates', template)
+
+        if not os.path.exists(path):
+            raise FileNotFoundError(f'Template {template} not found')
+        
+        template = Template(path, True).substitute(context)
 
     request.send_response(status)
     request.send_header('Content-type', 'text/html')
     request.end_headers()
 
-    template = Template(path).substitute(context)
-
     return request.wfile.write(template.encode())
+
+
+def make_html(content: str) -> str:
+    return '<%parsed%>' + content
