@@ -17,9 +17,9 @@ def json(request):
     return json_response(request, {'hello' : 'world'}, 200)
 
 
-@routes.route('/html/<str:string>/<int:integer>')
-def html(request, string, integer):
-    return html_response(request, make_html(f'<h1 style="text-align: center;">{string} + {integer}</h1>'), 200)
+@routes.route('/html/<param>')
+def html(request, param):
+    return html_response(request, make_html(f'<h1 style="text-align: center;">{param}</h1>'), 200)
 
 
 app.add_routes(routes)
