@@ -1,6 +1,10 @@
 from typing import Optional
 
 
+def make_html(content: str) -> str:
+    return '<%parsed%>' + content
+
+
 class Template:
     def __init__(self, template: str, is_file: bool=True):
         if is_file:

@@ -1,7 +1,7 @@
 from typing import Union, Optional
 
 from .requests import RequestHandler
-from .templates import Template
+from .html import Template
 
 import json
 import os
@@ -53,7 +53,3 @@ def html_response(request: RequestHandler, template: str, status: int = 200, con
     request.end_headers()
 
     return request.wfile.write(template.encode())
-
-
-def make_html(content: str) -> str:
-    return '<%parsed%>' + content
