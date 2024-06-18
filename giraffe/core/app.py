@@ -31,11 +31,17 @@ class Giraffe:
         httpd.post_routes = self._post_routes
         httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore + rewrite
 
-        print(f'Starting server {self._name} on http://127.0.0.1:{self._port}')
+        print(f"Starting server '{self._name}' on http://127.0.0.1:{self._port}")
         
         try:
+            print(f"'{self._name}' started")
             httpd.serve_forever()
 
         except KeyboardInterrupt:
-            print(f'Stopping server {self._name}...')
+
+            print(f"Stopping server '{self._name}'")
+            httpd.server_close()
+
+        else:
+            print(f"Server failed to start")
             httpd.server_close()

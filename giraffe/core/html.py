@@ -2,7 +2,7 @@ from typing import Optional
 
 
 def make_html(content: str) -> str:
-    return '<%parsed%>' + content
+    return '<%loaded%>' + content
 
 
 class Template:

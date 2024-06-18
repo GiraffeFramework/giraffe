@@ -35,7 +35,7 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
 
 
 def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
-    if template.startswith('<%parsed%>'):
+    if template.startswith('<%loaded%>'):
         template = template[10:]
 
         Template(template, False).substitute(context)
