@@ -22,6 +22,11 @@ def html(request, param):
     return html_response(request, make_html(f'<h1 style="text-align: center;">{param}</h1>'), 200)
 
 
+@routes.get('/get')
+def get(request):
+    return response(request, 'easier method to declare endpoint types', 200)
+
+
 app.add_routes(routes)
 
 
