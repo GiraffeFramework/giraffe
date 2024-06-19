@@ -47,3 +47,12 @@ class Routes:
 
     def post(self, path: str) -> Callable:
         return self.route(path, ['POST'])
+    
+    def put(self, path: str) -> Callable:
+        return self.route(path, ['PUT'])
+    
+    def patch(self, path: str) -> Callable:
+        return self.route(path, ['PATCH'])
+    
+    def delete(self, path: str) -> Callable:
+        return self.route(path, ['DELETE'])
