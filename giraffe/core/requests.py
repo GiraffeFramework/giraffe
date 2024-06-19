@@ -11,22 +11,23 @@ import re
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.server: GiraffeServer
         self.body: Any
         
     def do_GET(self):
-        handler, params = self._match_route(self.server.get_routes)
+        handler, params = self._match_route('GET')
 
         if not handler:
-            return self.send_error(404, 'Not found')
+            return self.send_error(params['status'], params['error'])
 
         return handler(self, **params)
     
     def do_POST(self):
-        handler, params = self._match_route(self.server.post_routes)
+        handler, params = self._match_route('POST')
 
         if not handler:
-            return self.send_error(404, 'Not found')
+            return self.send_error(params['status'], params['error'])
 
         content_length = int(self.headers.get('Content-Length', -1))
         content_type = self.headers.get('Content-Type')
@@ -48,18 +49,24 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         return handler(self, **params)
 
-    def _match_route(self, routes: dict[re.Pattern, Callable]) -> Tuple[Optional[Callable], Dict[str, Any]]:
-        if not routes:
-            return None, {}
+    def _match_route(self, method: str) -> Tuple[Optional[Callable], Dict[str, Any]]:
+        if not self.server.routes:
+            return None, {'status' : 404, 'error' : 'Not Found'}
             
-        for regex, func in routes.items():
-            match = regex.match(self.path)
+        for route in self.server.routes:
+            match = route.pattern.match(self.path)
 
             if not match:
                 continue
 
+            if not route.method == method:
+                if match:
+                    return None, {'status' : 405, 'error' : 'Method Not Allowed'}
+
+                continue
+
             params = match.groupdict()
 
-            return func, params
+            return route.handler, params
 
-        return None, {}
+        return None, {'status' : 404, 'error' : 'Not Found'}
