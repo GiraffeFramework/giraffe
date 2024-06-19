@@ -19,7 +19,7 @@ def response(request: RequestHandler, content: str = '', status: int = 200) -> i
 
 
 def json_response(request: RequestHandler, data: Union[dict, list], status: int = 200) -> int:
-    if not isinstance(data, dict) or not isinstance(data, list):
+    if not isinstance(data, dict) and not isinstance(data, list):
         raise TypeError('data must be a dict or a list')
     
     if not data:
