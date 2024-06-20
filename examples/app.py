@@ -1,5 +1,5 @@
 from giraffe.core.html import make_html
-from giraffe.core.responses import response, json_response, html_response
+from giraffe.core.responses import text_response, json_response, html_response
 from giraffe.core.routes import Routes
 from giraffe import Giraffe
 
@@ -9,7 +9,7 @@ routes = Routes()
 
 @routes.route('/')
 def text(request):
-    return response(request, 'hello world', 200)
+    return text_response(request, 'hello world', 200)
 
 
 @routes.route('/json')
@@ -24,7 +24,7 @@ def html(request, param):
 
 @routes.get('/get')
 def get(request):
-    return response(request, 'easier method to declare endpoint types', 200)
+    return text_response(request, 'easier method to declare endpoint types', 200)
 
 
 app.add_routes(routes)

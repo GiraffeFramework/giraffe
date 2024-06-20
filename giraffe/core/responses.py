@@ -7,7 +7,7 @@ import json
 import os
 
 
-def response(request: RequestHandler, content: str = '', status: int = 200) -> int:
+def text_response(request: RequestHandler, content: str = '', status: int = 200) -> int:
     if not content:
         status = 204
 
