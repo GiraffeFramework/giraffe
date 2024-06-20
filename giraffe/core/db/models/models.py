@@ -9,13 +9,13 @@ class Model:
 
         return None
 
-    def create(self, *args) -> Tuple[Any, Dict]:
+    def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
             return None, {'status' : 400, 'error' : "No body"}
 
         invalid_fields: List = []
 
-        for arg in args:
+        for arg in required_fields:
             field: Field = arg
 
             if not field.name in self._body:
