@@ -1,4 +1,4 @@
-from .fields import String, Integer, Float, Date
+from .fields import Field, String, Integer, Float, Date
 
 class Fields:
     String = String

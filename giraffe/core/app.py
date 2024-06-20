@@ -2,15 +2,17 @@ from .requests import RequestHandler
 from .routes import Routes
 from .server import GiraffeServer
 
+from typing import List
+
 import sys
 import os
 
 
 class Giraffe:
     def __init__(self, name: str, port: int = 4000):
-        self._name = name
-        self._port = port
-        self._routes = []
+        self._name: str = name
+        self._port: int = port
+        self._routes: List = []
 
     def add_routes(self, routes: Routes):
         self._routes.extend(routes.routes)
