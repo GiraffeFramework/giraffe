@@ -1,70 +1,70 @@
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Type
 
 
-def _is_valid(value: Any, expected_type: Any, name: str) -> bool:
+def _is_valid(value: Any, expected_type: Type, name: str) -> bool:
     if value is not None and not isinstance(value, expected_type):
         raise TypeError(f"Invalid value for {name}, expected {expected_type.__name__}")
-        
+    
     return True
 
 
 class Field:
-    def __init__(self, name: str, nullable: bool=True, primary_key: bool=False, unique: bool=False):
-        self.name: str | None = name if _is_valid(name, str, "name") else None
+    def __init__(self, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False):
+        if not _is_valid(name, str, "name"):
+            raise ValueError(f"Invalid field, name= argument is required.")
+        
+        self.name = name
         self.nullable = nullable
         self.primary_key = primary_key
         self.unique = unique
+        self.default = None
+        self.max_length = None
+        self.min_length = None
 
-        if not self.name:
-            return ValueError(f"Invalid field, name= argument is required.")
+    def valid(self, value: str) -> Tuple[bool, str]:
+        if self.max_length and len(value) > self.max_length:
+            return False, "Maximum length exceeded"
+            
+        if self.min_length and len(value) < self.min_length:
+            return False, "Minimum length not reached"
+            
+        return True, ""
 
 
 class String(Field):
-    def __init__(self, name: str, max_length: Optional[int] = 0, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool=True, primary_key: bool=False, unique: bool=False) -> None:
+    def __init__(self, name: str, max_length: Optional[int] = 0, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__(name, nullable, primary_key, unique)
 
-        if max_length and _is_valid(max_length, int, "max_length"):
+        if max_length is not None and _is_valid(max_length, int, "max_length"):
             self.max_length = max_length
 
-        if min_length and _is_valid(min_length, int, "min_length"):
+        if min_length is not None and _is_valid(min_length, int, "min_length"):
             self.min_length = min_length
-
-        if default and _is_valid(default, int, "default"):
-            if not self.valid(default):
+        
+        if default is not None and _is_valid(default, str, "default"):
+            if not self.valid(default)[0]:
                 raise ValueError(f"Invalid default '{default}' provided")
             
             self.default = default
 
-    def valid(self, value) -> Tuple[bool, str]:
-        if self.max_length and len(value) > self.max_length:
-            return False, "Maximum length exceeded"
-        
-        if self.min_length and len(value) < self.min_length:
-            return False, "Minimum length not reached"
-        
-        return True, ""
-
 
 class Integer(Field):
-    def __init__(self, name: str, default: Optional[int], nullable: bool=True) -> None:
-        super().__init__(name, nullable)
+    def __init__(self, name: str, default: Optional[int] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        super().__init__(name, nullable, primary_key, unique)
 
-        if default and _is_valid(default, int, "default"):
+        if default is not None and _is_valid(default, int, "default"):
             self.default = default
 
 
 class Float(Field):
-    def __init__(self, name: str, default: Optional[float], nullable: bool=True) -> None:
-        super().__init__(name, nullable)
+    def __init__(self, name: str, default: Optional[float] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        super().__init__(name, nullable, primary_key, unique)
 
-        if default and _is_valid(default, int, "default"):
+        if default is not None and _is_valid(default, float, "default"):
             self.default = default
 
 
 class Date(Field):
-    def __init__(self, name: str, default: Optional[Any], nullable: bool=True) -> None:
-        super().__init__(name, nullable)
-
-        if default and _is_valid(default, int, "default"):
-            self.default = default
+    def __init__(self, name: str, default: Optional[Any] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        super().__init__(name, nullable, primary_key, unique)
 

@@ -4,7 +4,7 @@ from typing import Tuple, Dict, Optional, Any, List
     
 
 class Model:
-    def __init__(self, body: Optional[Dict]=None) -> None:
+    def __init__(self, body: Optional[Dict] = None) -> None:
         self._body: Dict | None = body
 
         return None
