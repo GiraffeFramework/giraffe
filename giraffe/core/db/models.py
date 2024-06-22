@@ -1,4 +1,4 @@
-from ..fields import Field
+from .fields import Field
 
 from typing import Tuple, Dict, Optional, Any, List
     

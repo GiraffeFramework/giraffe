@@ -68,3 +68,11 @@ class Date(Field):
     def __init__(self, name: str, default: Optional[Any] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__(name, nullable, primary_key, unique)
 
+
+class Fields:
+    String = String
+    Integer = Integer
+    Float = Float
+    Date = Date
+
+fields = Fields()
