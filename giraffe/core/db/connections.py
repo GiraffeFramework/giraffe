@@ -8,10 +8,16 @@ cursor = conn.cursor()
 
 
 def execute(query: str) -> List:
-    print(query)
+    print('query', query)
 
     cursor.execute(query)
 
-    print(cursor.fetchall())
-
     return []
+
+
+def execute_script(script: str) -> None:
+    print('script', script)
+
+    cursor.executescript(script)
+
+    return None

@@ -31,13 +31,25 @@ class Model:
     
     @classmethod
     def get_schema(cls) -> dict:
-        schema: Dict = {cls()._get_name(): {}}
+        schema: Dict = {}
+        primary_key: bool = False
 
         for key, value in cls.__dict__.items():
-            if isinstance(value, Field):
-                schema[cls()._get_name()][key] = value.get_schema()
+            if not isinstance(value, Field):
+                continue
 
-        return schema
+            if value.primary_key:
+                if primary_key:
+                    raise ValueError("Model can only have one primary key")
+                    
+                primary_key = True
+
+            schema[key] = value.get_schema()
+
+        if not primary_key:
+            raise ValueError("Model must have a primary key")
+
+        return {cls()._get_name(): schema}
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
@@ -68,7 +80,5 @@ class Model:
         
         if value and not self._field_exists(value):
             raise ValueError(f"Cannot return by value {value}")
-
-        print(self._get_name())
 
         return execute(f"SELECT {value if value else '*'} FROM {self._get_name()}{f' ORDER BY {order}' if order else ''}")

@@ -33,7 +33,7 @@ class Field:
     
     def get_schema(self) -> dict:
         return {
-            "type": "string",
+            "type": self.type,
             "nullable": self.nullable,
             "primary_key": self.primary_key,
             "unique": self.unique,
@@ -43,11 +43,12 @@ class Field:
 
 
 class String(Field):
-    def __init__(self, name: str, max_length: Optional[int] = 0, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('string', name, nullable, primary_key, unique)
+    def __init__(self, name: str, max_length: Optional[int] = 1, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        super().__init__('VARCHAR', name, nullable, primary_key, unique)
 
         if max_length is not None and _is_valid(max_length, int, "max_length"):
             self.max_length = max_length
+            self.type = f"VARCHAR({max_length})"
 
         if min_length is not None and _is_valid(min_length, int, "min_length"):
             self.min_length = min_length
@@ -61,47 +62,23 @@ class String(Field):
 
 class Integer(Field):
     def __init__(self, name: str, default: Optional[int] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('integer', name, nullable, primary_key, unique)
+        super().__init__('INT', name, nullable, primary_key, unique)
 
         if default is not None and _is_valid(default, int, "default"):
             self.default = default
 
-    def get_schema(self) -> dict:
-        return {
-            "type": "string",
-            "nullable": self.nullable,
-            "primary_key": self.primary_key,
-            "unique": self.unique
-        }
-
 
 class Float(Field):
     def __init__(self, name: str, default: Optional[float] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('float', name, nullable, primary_key, unique)
+        super().__init__('FLOAT', name, nullable, primary_key, unique)
 
         if default is not None and _is_valid(default, float, "default"):
             self.default = default
 
-    def get_schema(self) -> dict:
-        return {
-            "type": "string",
-            "nullable": self.nullable,
-            "primary_key": self.primary_key,
-            "unique": self.unique
-        }
-
 
 class Date(Field):
-    def __init__(self, name: str, default: Optional[Any] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('date', name, nullable, primary_key, unique)
-
-    def get_schema(self) -> dict:
-        return {
-            "type": "string",
-            "nullable": self.nullable,
-            "primary_key": self.primary_key,
-            "unique": self.unique
-        }
+    def __init__(self, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        super().__init__('DATE', name, nullable, primary_key, unique)
 
 
 class Fields:
