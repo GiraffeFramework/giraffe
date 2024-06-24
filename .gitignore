@@ -15,3 +15,6 @@ build/
 
 # Databases
 db.sqlite3
+
+# Migrations
+migrations/
