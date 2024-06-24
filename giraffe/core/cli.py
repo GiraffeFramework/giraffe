@@ -4,8 +4,6 @@ import pkgutil
 
 
 def main():
-    print("loaded cli")
-
     parser = argparse.ArgumentParser(description="Giraffe Command Line Interface")
     subparsers = parser.add_subparsers(dest="command")
 
