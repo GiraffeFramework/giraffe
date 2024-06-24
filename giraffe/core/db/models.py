@@ -28,6 +28,16 @@ class Model:
             raise ValueError("Table name cannot contain non-alphanumeric characters")
         
         return name
+    
+    @classmethod
+    def get_schema(cls) -> dict:
+        schema: Dict = {cls()._get_name(): {}}
+
+        for key, value in cls.__dict__.items():
+            if isinstance(value, Field):
+                schema[cls()._get_name()][key] = value.get_schema()
+
+        return schema
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
