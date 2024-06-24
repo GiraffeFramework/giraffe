@@ -13,4 +13,5 @@ build/
 # VS Code
 .vscode/
 
-test.py
+# Databases
+db.sqlite3

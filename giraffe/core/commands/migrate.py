@@ -1,6 +1,6 @@
 from typing import List
 
-from ..db.defaults import _Migration
+from ..db.defaults import Migration
 
 import argparse
 
@@ -10,4 +10,12 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 
 def execute(args):
-    available_migrations = _Migration().all('applied_at')
+    available_migrations = _get_migrations()
+
+
+def _get_migrations():
+    try:
+        return Migration().all('applied_at')
+
+    except:
+        return []

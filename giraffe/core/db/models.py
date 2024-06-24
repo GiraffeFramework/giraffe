@@ -16,7 +16,7 @@ class Model:
     
     def _get_name(self) -> str:
         if self._field_exists('__tablename__'):
-             self._valid_table_name(self.__tablename__) # type: ignore
+            return self._valid_table_name(self.__tablename__) # type: ignore
         
         return self._valid_table_name(self.__class__.__name__.lower())
     
@@ -61,4 +61,4 @@ class Model:
 
         print(self._get_name())
 
-        return execute(f"SELECT {value if value else '*'} FROM {self._get_name()}{f'ORDER BY {order}' if order else ''}")
+        return execute(f"SELECT {value if value else '*'} FROM {self._get_name()}{f' ORDER BY {order}' if order else ''}")
