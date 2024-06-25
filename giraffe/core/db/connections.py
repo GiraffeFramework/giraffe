@@ -11,6 +11,7 @@ def execute(query: str) -> List:
     print('query', query)
 
     cursor.execute(query)
+    conn.commit()
 
     return []
 
@@ -19,5 +20,6 @@ def execute_script(script: str) -> None:
     print('script', script)
 
     cursor.executescript(script)
+    conn.commit()
 
     return None

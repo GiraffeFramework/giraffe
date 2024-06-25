@@ -1,5 +1,7 @@
 import argparse
 
+from ..db.defaults import Migration
+
 
 def add_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--host", default="127.0.0.1", help="Host to run the server on")
@@ -7,7 +9,11 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 
 def execute(args):
-    print(f"Starting server on {args.host}:{args.port}")
+    #print(f"Starting server on {args.host}:{args.port}")
     # Your logic to start the server
     # from giraffe.core.app import start_server
     # start_server(args.host, args.port)
+
+    Migration({'name' : "test"}).create()
+
+    print('created migration test')

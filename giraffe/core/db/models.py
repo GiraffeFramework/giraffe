@@ -72,6 +72,13 @@ class Model:
         if invalid_fields:
             return None, {'status' : 400, 'error' : f"Invalid {', '.join(invalid_fields)}"}
         
+        fields = ', '.join(self._body.keys())
+        values = ', '.join(f"'{self._body[field]}'" for field in self._body.keys())
+
+        query = f"INSERT INTO {self._get_name()} ({fields}) VALUES ({values})"
+
+        execute(query)
+        
         return None, {'status' : 200, 'error' : "THERE WAS NONE!"}
 
     def all(self, order: Optional[str]=None, value: Optional[str]=None) -> List:
