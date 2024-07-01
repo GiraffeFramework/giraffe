@@ -14,6 +14,6 @@ def execute(args):
     # from giraffe.core.app import start_server
     # start_server(args.host, args.port)
 
-    Migration({'name' : "test"}).create()
+    #Migration({'name' : "test"}).create()
 
     print('created migration test')
