@@ -1,5 +1,6 @@
-import argparse
+from pathlib import Path
 
+import argparse
 import os
 
 
@@ -13,7 +14,7 @@ def execute(args):
     Creates necessary files for a basic Giraffe project.
     """
 
-    root_dir = os.getcwd()
+    root_dir = Path.cwd()
 
     with open(os.path.join(root_dir, "wsgi.py"), "w") as f:
         f.write(f"""# app entry point
@@ -28,11 +29,11 @@ if __name__ == '__main__':
 
 """)
 
-    project_dir = os.path.join(root_dir, args.name)
+    project_dir = root_dir / args.name
 
     os.mkdir(project_dir)
 
-    config_path = os.path.join(project_dir, "config.py")
+    config_path = project_dir / "config.py"
 
     with open(config_path, "w") as f:
         f.write(f"""# config file
@@ -44,7 +45,7 @@ PROJECT_NAME = "{args.name}"
 APPS = []
 """)
         
-    init_path = os.path.join(project_dir, "__init__.py")
+    init_path = project_dir / "__init__.py"
 
     with open(init_path, "w") as f:
         f.write(f"""from giraffe import Giraffe
@@ -55,5 +56,7 @@ def create_app():
 
     return app
 """)
+        
+    os.environ['GIRAFFE_APP'] = args.name
 
-    print(args.name)
+    
