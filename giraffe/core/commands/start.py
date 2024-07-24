@@ -1,19 +1,59 @@
 import argparse
 
-from ..db.defaults import Migration
+import os
 
 
 def add_arguments(parser: argparse.ArgumentParser):
-    parser.add_argument("--host", default="127.0.0.1", help="Host to run the server on")
-    parser.add_argument("--port", type=int, default=8000, help="Port to run the server on")
+    parser.add_argument("name", help="Name of your new Giraffe project")
 
 
 def execute(args):
-    #print(f"Starting server on {args.host}:{args.port}")
-    # Your logic to start the server
-    # from giraffe.core.app import start_server
-    # start_server(args.host, args.port)
+    """
+    Start a Giraffe project with chosen name.
+    Creates necessary files for a basic Giraffe project.
+    """
 
-    #Migration({'name' : "test"}).create()
+    root_dir = os.getcwd()
 
-    print('created migration test')
+    with open(os.path.join(root_dir, "wsgi.py"), "w") as f:
+        f.write(f"""# app entry point
+from {args.name} import create_app
+
+
+app = create_app()
+
+
+if __name__ == '__main__':
+    app.start()
+
+""")
+
+    project_dir = os.path.join(root_dir, args.name)
+
+    os.mkdir(project_dir)
+
+    config_path = os.path.join(project_dir, "config.py")
+
+    with open(config_path, "w") as f:
+        f.write(f"""# config file
+ 
+ROOT = "{root_dir}"
+
+PROJECT_NAME = "{args.name}"
+
+APPS = []
+""")
+        
+    init_path = os.path.join(project_dir, "__init__.py")
+
+    with open(init_path, "w") as f:
+        f.write(f"""from giraffe import Giraffe
+
+
+def create_app():
+    app = Giraffe(__name__, port=4000)
+
+    return app
+""")
+
+    print(args.name)
