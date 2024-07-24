@@ -9,14 +9,14 @@ giraffe add {name}
 Add a Giraffe app
 
 ```swift
-// already exists
+// required
 - wsgi.py
 - project_name/
   - __init__.py
   - config.py
-// added
+// newly added
 - app_name/
-  - __init_-.py
+  - __init__.py
   - models.py
   - views.py
 ```
