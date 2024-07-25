@@ -1,4 +1,4 @@
-from giraffe.core.html import make_html
+from giraffe.core.html import make_html, safe_html
 from giraffe.core.responses import text_response, json_response, html_response
 from giraffe.core.routes import Routes
 from giraffe import Giraffe
@@ -19,7 +19,7 @@ def json(request):
 
 @routes.route('/html/<param>')
 def html(request, param):
-    return html_response(request, make_html(f'<h1 style="text-align: center;">{param}</h1>'), 200)
+    return html_response(request, make_html(f'<h1 style="text-align: center;">{safe_html(param)}</h1>'), 200)
 
 
 @routes.get('/get')

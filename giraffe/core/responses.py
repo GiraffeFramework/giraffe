@@ -7,15 +7,20 @@ import json
 import os
 
 
-def text_response(request: RequestHandler, content: str = '', status: int = 200) -> int:
+def response(request: RequestHandler, content: str, content_type: str, status: int = 200) -> int:
     if not content:
         status = 204
 
     request.send_response(status)
-    request.send_header('Content-type', 'text/plain')
+    request.send_header('Content-type', content_type)
     request.end_headers()
 
     return request.wfile.write(content.encode())
+
+
+def text_response(request: RequestHandler, content: str = '', status: int = 200) -> int:
+    return response(request, content, 'text/plain', status)
+    
 
 
 def json_response(request: RequestHandler, data: Union[dict, list], status: int = 200) -> int:
@@ -25,13 +30,7 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
     if not data:
         status = 204
 
-    request.send_response(status)
-    request.send_header('Content-type', 'application/json')
-    request.end_headers()
-
-    json_data = json.dumps(data)
-
-    return request.wfile.write(json_data.encode())
+    return response(request, json.dumps(data), 'application/json', status)
 
 
 def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
@@ -48,8 +47,4 @@ def html_response(request: RequestHandler, template: str, status: int = 200, con
         
         template = Template(path, True).substitute(context)
 
-    request.send_response(status)
-    request.send_header('Content-type', 'text/html')
-    request.end_headers()
-
-    return request.wfile.write(template.encode())
+    return response(request, template, 'text/html', status)
