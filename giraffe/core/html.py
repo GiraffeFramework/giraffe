@@ -1,10 +1,6 @@
 from typing import Optional
 
 
-def make_html(content: str) -> str:
-    return '<%loaded%>' + content
-
-
 def safe_html(content: str) -> str:
     return content.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;").replace("'", "&#39;").replace('"', "&#34;")
 

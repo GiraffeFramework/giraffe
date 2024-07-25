@@ -53,6 +53,9 @@ APPS = []
 
 def create_app():
     app = Giraffe(__name__, port=4000)
+                
+    # add your routes here
+    # app.add_routes(Routes())
 
     return app
 """)

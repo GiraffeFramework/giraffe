@@ -34,17 +34,15 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
 
 
 def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
-    if template.startswith('<%loaded%>'):
-        template = template[10:]
-
-        Template(template, False).substitute(context)
-    
-    else:
+    if template.startswith('templates/'):
         path = os.path.join(request.server.root, 'templates', template)
 
         if not os.path.exists(path):
             raise FileNotFoundError(f'Template {template} not found')
         
         template = Template(path, True).substitute(context)
+    
+    else:
+        Template(template, False).substitute(context)
 
     return response(request, template, 'text/html', status)

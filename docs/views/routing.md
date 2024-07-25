@@ -7,6 +7,7 @@ Initiate a `Routes()` object. You can define a prefix that will be added to all 
 ```py
 routes = Routes()
 
+# Prepend all routes registered to 'routes' with '/auth/user'
 routes = Routes(prefix='/auth/user')
 ```
 
