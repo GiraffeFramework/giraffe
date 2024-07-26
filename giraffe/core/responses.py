@@ -1,7 +1,7 @@
 from typing import Union, Optional
 
+from .templates.html import Template
 from .requests import RequestHandler
-from .html import Template
 
 import json
 import os
@@ -26,9 +26,6 @@ def text_response(request: RequestHandler, content: str = '', status: int = 200)
 def json_response(request: RequestHandler, data: Union[dict, list], status: int = 200) -> int:
     if not isinstance(data, dict) and not isinstance(data, list):
         raise TypeError('data must be a dict or a list')
-    
-    if not data:
-        status = 204
 
     return response(request, json.dumps(data), 'application/json', status)
 

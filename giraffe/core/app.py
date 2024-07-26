@@ -28,7 +28,7 @@ class Giraffe:
         httpd = GiraffeServer(server_address, RequestHandler)
 
         httpd.routes = self._routes
-        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore + rewrite
+        httpd.root = os.path.join(os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__)), 'app') # type: ignore + TODO
 
         print(f"Starting server '{self._name}' on http://127.0.0.1:{self._port}")
         

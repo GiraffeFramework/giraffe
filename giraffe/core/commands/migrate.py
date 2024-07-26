@@ -34,6 +34,8 @@ def execute(args):
             migration_steps += f" CREATE TABLE IF NOT EXISTS {schema['name']} ({', '.join(_get_field(field) for field in schema['fields'])});"
 
         else:
+            # TODO
+
             print('incoming')
 
     if not migration_steps:

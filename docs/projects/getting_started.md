@@ -7,6 +7,11 @@ First you will have to run `giraffe create {project_name}`. This will add the fo
     - __init__.py
     - config.py
 - wsgi.py
+- static/
+    - css/
+    - js/
+    - img/
+- templates/
 ```
 
 Your root project is __not__ intended to hold any views. Instead, views must be added in a Giraffe app. To create a giraffe app, run `giraffe add {app_name}`. This will add the following files to your directory:

@@ -36,6 +36,7 @@ class Routes:
         def decorator(func: Callable) -> Callable:
             for method in methods:
                 compiled_pattern = self._generate_route(path)
+                
                 self.routes.append(Route(compiled_pattern, method, func))
 
             return func
