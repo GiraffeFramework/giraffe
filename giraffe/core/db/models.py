@@ -8,6 +8,7 @@ from .connections import execute
 class Model:
     def __init__(self, body: Optional[Dict] = None) -> None:
         self._body: Dict | None = body
+        self._name: str = self._get_name()
 
         return None
     
@@ -29,9 +30,13 @@ class Model:
         
         return name
     
+    @property
+    def name(self) -> str:
+        return self._name
+    
     @classmethod
     def get_schema(cls) -> dict:
-        schema: Dict = {}
+        schemas: list = []
         primary_key: bool = False
 
         for key, value in cls.__dict__.items():
@@ -44,12 +49,15 @@ class Model:
                     
                 primary_key = True
 
-            schema[key] = value.get_schema()
+            schema = value.get_schema()
+            schema['name'] = key
+
+            schemas.append(schema)
 
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {cls()._get_name(): schema}
+        return {"name" : cls()._name, "fields" : schemas, "table" : "alter"}
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
@@ -75,7 +83,7 @@ class Model:
         fields = ', '.join(self._body.keys())
         values = ', '.join(f"'{self._body[field]}'" for field in self._body.keys())
 
-        query = f"INSERT INTO {self._get_name()} ({fields}) VALUES ({values})"
+        query = f"INSERT INTO {self._name} ({fields}) VALUES ({values})"
 
         execute(query)
         
@@ -88,10 +96,10 @@ class Model:
         if value and not self._field_exists(value):
             raise ValueError(f"Cannot return by value {value}")
 
-        return execute(f"SELECT {value if value else '*'} FROM {self._get_name()}{f' ORDER BY {order}' if order else ''}")
+        return execute(f"SELECT {value if value else '*'} FROM {self._name}{f' ORDER BY {order}' if order else ''}")
     
     def latest(self, order: str, value: Optional[str]=None) -> List:
         if not self._field_exists(order):
             raise ValueError(f"Cannot return by value {order}")
 
-        return execute(f"SELECT {value if value else '*'} FROM {self._get_name()} ORDER BY {order} DESC LIMIT 1")
+        return execute(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC LIMIT 1")
