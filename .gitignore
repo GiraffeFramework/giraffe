@@ -13,10 +13,15 @@ build/
 # VS Code
 .vscode/
 
-# Databases
-db.sqlite3
+*.code-workspace
 
-# Migrations
+# TEMPORARY
+auth/
+sample/
+static/
+templates/
 migrations/
 
-*.code-workspace
+wsgi.py
+
+db.sqlite3

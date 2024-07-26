@@ -89,3 +89,9 @@ class Model:
             raise ValueError(f"Cannot return by value {value}")
 
         return execute(f"SELECT {value if value else '*'} FROM {self._get_name()}{f' ORDER BY {order}' if order else ''}")
+    
+    def latest(self, order: str, value: Optional[str]=None) -> List:
+        if not self._field_exists(order):
+            raise ValueError(f"Cannot return by value {order}")
+
+        return execute(f"SELECT {value if value else '*'} FROM {self._get_name()} ORDER BY {order} DESC LIMIT 1")

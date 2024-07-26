@@ -11,6 +11,11 @@ Create a Giraffe project
 ```swift
 - wsgi.py
 - project_name/
-  - __init__.py
-  - config.py
+    - __init__.py
+    - config.py
+- static/
+    - css/
+    - img/
+    - js/
+- templates/
 ```

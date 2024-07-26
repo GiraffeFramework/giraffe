@@ -60,6 +60,18 @@ def create_app():
     return app
 """)
         
+    templates_path = root_dir / "templates"
+    templates_path.mkdir(parents=True)
+
+    css_path = root_dir / "static" / "css"
+    css_path.mkdir(parents=True)
+
+    js_path = root_dir / "static" / "js"
+    js_path.mkdir(parents=True)
+
+    images_path = root_dir / "static" / "img"
+    images_path.mkdir(parents=True)
+        
     os.environ['GIRAFFE_APP'] = args.name
 
     
