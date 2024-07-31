@@ -2,6 +2,8 @@ from http.server import BaseHTTPRequestHandler
 
 from typing import Any, Callable, Dict, Optional, Tuple
 
+from urllib.parse import parse_qs
+
 from .server import GiraffeServer
 
 import json
@@ -58,7 +60,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_error(400, 'Invalid JSON')
 
         elif content_type == 'application/x-www-form-urlencoded':
-            self.body = dict(re.findall(r'(\w+)=(.+)', body.decode()))
+            # Turn the body into a dict
+            self.body = parse_qs(body.decode('utf-8'))
 
         else:
             self.send_error(415, 'Unsupported Media Type')

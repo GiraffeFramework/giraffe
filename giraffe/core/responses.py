@@ -41,6 +41,6 @@ def html_response(request: RequestHandler, template: str, status: int = 200, con
             raise FileNotFoundError(f'Template {template} not found')
     
     else:
-        template = Template(path, True).substitute(context)
+        template = Template(path, True, request.server.root).substitute(context)
     
     return response(request, template, 'text/html', status)

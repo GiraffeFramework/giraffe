@@ -1,5 +1,5 @@
 from .requests import RequestHandler
-from .routes import Routes
+from .routes import Routes, default_routes
 from .server import GiraffeServer
 
 from typing import List
@@ -23,6 +23,8 @@ class Giraffe:
     def start(self):
         if not self._valid_port(self._port):
             raise ValueError('Invalid port')
+
+        self.add_routes(default_routes)
 
         server_address = ('', self._port)
         httpd = GiraffeServer(server_address, RequestHandler)

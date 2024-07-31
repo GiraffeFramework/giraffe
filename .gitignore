@@ -21,6 +21,7 @@ sample/
 static/
 /templates/
 migrations/
+_cached/
 
 wsgi.py
 
