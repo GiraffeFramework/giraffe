@@ -1,6 +1,6 @@
-from giraffe.core.templates.html import safe_html
 from giraffe.core.responses import text_response, json_response, html_response
 from giraffe.core.routes import Routes
+from giraffe.core.html import safe_html
 from giraffe import Giraffe
 
 app = Giraffe(__name__)

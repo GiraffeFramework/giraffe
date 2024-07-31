@@ -4,7 +4,10 @@ setup(
     name='giraffe',
     version='0.1.0',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        'lxml>=5.2.2',
+        'requests>=2.30.0',
+    ],
     python_requires='>=3.6',
     author='Torben Petré (kipteamm)',
     author_email='contact@kipteam.net',

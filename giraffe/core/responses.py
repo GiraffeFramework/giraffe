@@ -1,6 +1,6 @@
 from typing import Union, Optional
 
-from .templates.html import Template
+from .html.template import Template
 from .requests import RequestHandler
 
 import json
@@ -31,15 +31,16 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
 
 
 def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
-    if template.startswith('templates/'):
-        path = os.path.join(request.server.root, 'templates', template)
+    path = os.path.join(request.server.root, 'templates', template)
 
-        if not os.path.exists(path):
+    if not os.path.exists(path):
+        try:
+            Template(template, False).substitute(context)
+            
+        except:
             raise FileNotFoundError(f'Template {template} not found')
-        
-        template = Template(path, True).substitute(context)
     
     else:
-        Template(template, False).substitute(context)
-
+        template = Template(path, True).substitute(context)
+    
     return response(request, template, 'text/html', status)

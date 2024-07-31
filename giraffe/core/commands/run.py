@@ -4,6 +4,7 @@ from pathlib import Path
 
 import subprocess
 import argparse
+import sys
 import os
 import re
 
@@ -32,4 +33,8 @@ def execute(args):
         with open(wsgi_path, 'w') as file:
             file.write(content)
     
-    subprocess.run(["python", str(wsgi_path)])
+    try:
+        subprocess.run(["python", str(wsgi_path)], check=True)
+    
+    except KeyboardInterrupt:
+        sys.exit(0)

@@ -19,7 +19,7 @@ build/
 auth/
 sample/
 static/
-templates/
+/templates/
 migrations/
 
 wsgi.py
