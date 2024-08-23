@@ -23,6 +23,6 @@ static/
 migrations/
 _cached/
 
-wsgi.py
+entry.py
 
 db.sqlite3

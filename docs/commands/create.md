@@ -9,7 +9,7 @@ giraffe create {name}
 Create a Giraffe project
 
 ```swift
-- wsgi.py
+- entry.py
 - project_name/
     - __init__.py
     - config.py

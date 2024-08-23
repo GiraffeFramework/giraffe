@@ -6,7 +6,7 @@ First you will have to run `giraffe create {project_name}`. This will add the fo
 - project_name/
     - __init__.py
     - config.py
-- wsgi.py
+- entry.py
 - static/
     - css/
     - js/
@@ -21,9 +21,6 @@ Your root project is __not__ intended to hold any views. Instead, views must be 
     - __init__.py
     - models.py
     - views.py
-- project_name/
-    - __init__.py
-    - config.py
 ```
 
 See your project folder as your utils or commons file. An app can be interpretated as a functionality of your application. Example apps could be `auth`, `basket`, `checkout`, `products`, etc...

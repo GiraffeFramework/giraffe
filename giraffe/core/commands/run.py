@@ -19,10 +19,10 @@ def execute(args):
 
     root_dir = Path.cwd()
 
-    wsgi_path = root_dir / "wsgi.py"
+    wsgi_path = root_dir / "entry.py"
 
     if not os.path.exists(wsgi_path):
-        raise Exception(f"No wsgi.py file found.")
+        raise Exception(f"No entry.py file found.")
     
     if args.port:
         with open(wsgi_path, 'r') as file:

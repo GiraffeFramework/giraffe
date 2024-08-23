@@ -16,7 +16,7 @@ def execute(args):
 
     root_dir = Path.cwd()
 
-    with open(os.path.join(root_dir, "wsgi.py"), "w") as f:
+    with open(os.path.join(root_dir, "entry.py"), "w") as f:
         f.write(f"""# app entry point
 from {args.name} import create_app
 

@@ -10,7 +10,7 @@ Add a Giraffe app
 
 ```swift
 // required
-- wsgi.py
+- entry.py
 - project_name/
   - __init__.py
   - config.py
