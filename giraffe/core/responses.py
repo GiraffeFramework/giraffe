@@ -3,11 +3,11 @@ from typing import Union, Optional
 from .html.template import Template
 from .requests import RequestHandler
 
-import json
+import orjson
 import os
 
 
-def response(request: RequestHandler, content: str, content_type: str, status: int = 200) -> int:
+def response(request: RequestHandler, content: bytes, content_type: str, status: int = 200) -> int:
     if not content:
         status = 204
 
@@ -15,11 +15,11 @@ def response(request: RequestHandler, content: str, content_type: str, status: i
     request.send_header('Content-type', content_type)
     request.end_headers()
 
-    return request.wfile.write(content.encode())
+    return request.wfile.write(content)
 
 
 def text_response(request: RequestHandler, content: str = '', status: int = 200) -> int:
-    return response(request, content, 'text/plain', status)
+    return response(request, content.encode(), 'text/plain', status)
     
 
 
@@ -27,7 +27,7 @@ def json_response(request: RequestHandler, data: Union[dict, list], status: int 
     if not isinstance(data, dict) and not isinstance(data, list):
         raise TypeError('data must be a dict or a list')
 
-    return response(request, json.dumps(data), 'application/json', status)
+    return response(request, orjson.dumps(data), 'application/json', status)
 
 
 def html_response(request: RequestHandler, template: str, status: int = 200, context: Optional[dict]=None) -> int:
@@ -43,4 +43,4 @@ def html_response(request: RequestHandler, template: str, status: int = 200, con
     else:
         template = Template(path, True, request.server.root).substitute(context)
     
-    return response(request, template, 'text/html', status)
+    return response(request, template.encode(), 'text/html', status)

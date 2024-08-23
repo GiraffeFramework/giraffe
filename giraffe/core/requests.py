@@ -6,8 +6,7 @@ from urllib.parse import parse_qs
 
 from .server import GiraffeServer
 
-import json
-import re
+import orjson
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -54,9 +53,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if content_type == 'application/json':
             try:
-                self.body = json.loads(body)
+                self.body = orjson.loads(body)
 
-            except json.JSONDecodeError:
+            except orjson.JSONDecodeError:
                 self.send_error(400, 'Invalid JSON')
 
         elif content_type == 'application/x-www-form-urlencoded':
