@@ -31,14 +31,13 @@ class Field:
             
         return True, ""
     
-    def get_schema(self) -> dict:
+    def get_schema(self, name: str) -> dict:
         return {
+            "name" : name,
             "type": self.type,
-            "nullable": self.nullable,
-            "primary_key": self.primary_key,
-            "unique": self.unique,
-            "default": self.default,
-            "max_length": self.max_length,
+            "notnull": not self.nullable,
+            "dflt_value": self.default,
+            "pk": self.primary_key,
         }
 
 

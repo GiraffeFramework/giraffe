@@ -33,6 +33,8 @@ def execute(args):
     if not models:
         print("No migrations available.")
 
+        Migration()._get_db_schema()
+
         return
     
     MIGRATIONS_DIR.mkdir(exist_ok=True)
@@ -50,6 +52,8 @@ def execute(args):
         schemas: list = []
 
         for model in models:
+            model()._get_db_schema()
+
             schema = model.get_schema()
 
             if not version:

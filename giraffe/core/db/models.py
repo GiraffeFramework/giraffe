@@ -2,7 +2,7 @@ from .fields import Field
 
 from typing import Tuple, Dict, Optional, Any, List
 
-from .connections import execute
+from .connections import change_db, query_all
     
 
 class Model:
@@ -49,8 +49,7 @@ class Model:
                     
                 primary_key = True
 
-            schema = value.get_schema()
-            schema['name'] = key
+            schema = value.get_schema(key)
 
             schemas.append(schema)
 
@@ -58,6 +57,14 @@ class Model:
             raise ValueError("Model must have a primary key")
 
         return {"name" : cls()._name, "fields" : schemas, "table" : "alter"}
+    
+    def _get_db_schema(self) -> dict:
+        query_all(f"PRAGMA table_info({self._name})")
+
+        #query:  PRAGMA table_info(migrations)
+        #[(0, 'id', 'INT', 0, None, 1), (1, 'name', 'VARCHAR(10)', 0, None, 0), (2, 'applied_at', 'DATE', 0, None, 0)]
+
+        return {}
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
@@ -85,7 +92,7 @@ class Model:
 
         query = f"INSERT INTO {self._name} ({fields}) VALUES ({values})"
 
-        execute(query)
+        change_db(query)
         
         return None, {'status' : 200, 'error' : "THERE WAS NONE!"}
 
@@ -96,10 +103,10 @@ class Model:
         if value and not self._field_exists(value):
             raise ValueError(f"Cannot return by value {value}")
 
-        return execute(f"SELECT {value if value else '*'} FROM {self._name}{f' ORDER BY {order}' if order else ''}")
+        return query_all(f"SELECT {value if value else '*'} FROM {self._name}{f' ORDER BY {order}' if order else ''}")
     
     def latest(self, order: str, value: Optional[str]=None) -> List:
         if not self._field_exists(order):
             raise ValueError(f"Cannot return by value {order}")
 
-        return execute(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC LIMIT 1")
+        return query_all(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC LIMIT 1")
