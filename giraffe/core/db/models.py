@@ -2,11 +2,22 @@ from .fields import Field
 
 from typing import Tuple, Dict, Optional, Any, List
 
-from .connections import change_db, query_all
+from .connections import change_db, query_all, query_one
     
+
+def _schema_from_table_info(table_info: Tuple) -> dict:
+    return {
+        "name": table_info[1],
+        "type": table_info[2],
+        "notnull": bool(table_info[3]),
+        "dflt_value": table_info[4],
+        "pk": bool(table_info[5])
+    }
+
 
 class Model:
     def __init__(self, body: Optional[Dict] = None) -> None:
+        self.__tablename__: str = ''
         self._body: Dict | None = body
         self._name: str = self._get_name()
 
@@ -16,8 +27,8 @@ class Model:
         return hasattr(self, field)
     
     def _get_name(self) -> str:
-        if self._field_exists('__tablename__'):
-            return self._valid_table_name(self.__tablename__) # type: ignore
+        if self._field_exists('__tablename__') and self.__tablename__:
+            return self._valid_table_name(self.__tablename__)
         
         return self._valid_table_name(self.__class__.__name__.lower())
     
@@ -35,9 +46,43 @@ class Model:
         return self._name
     
     @classmethod
+    def get_schema_changes(cls) -> dict:
+        """
+        Loop over existing schemas from the databse and compare them to the current schema.
+
+        PRAGMA table_info(table_name) returns a list of tuples with the following structure:  
+        [(cid, name, type, notnull, dflt_value, pk), (...)]
+        """
+
+        old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls()._name})")
+        schemas: list[dict] = []
+
+        print('old_schemas: ', old_schemas)
+
+        if not old_schemas:
+            return cls.get_schema()
+        
+        for old_schema in old_schemas:
+            field: Optional[Field] = cls.__dict__.get(old_schema[1], None)
+
+            if not field:
+                schema = _schema_from_table_info(old_schema)
+                schema['mode'] = 'delete'
+
+            else:
+                schema = field.get_schema(old_schema[1])
+                schema['mode'] = 'update'
+
+            schemas.append(schema)
+
+        print('schemas: ', schemas)
+
+        return {"name" : cls()._name, "fields" : schemas, "table" : "alter"}
+    
+    @classmethod
     def get_schema(cls) -> dict:
-        schemas: list = []
         primary_key: bool = False
+        schemas: list = []
 
         for key, value in cls.__dict__.items():
             if not isinstance(value, Field):
@@ -56,15 +101,7 @@ class Model:
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {"name" : cls()._name, "fields" : schemas, "table" : "alter"}
-    
-    def _get_db_schema(self) -> dict:
-        query_all(f"PRAGMA table_info({self._name})")
-
-        #query:  PRAGMA table_info(migrations)
-        #[(0, 'id', 'INT', 0, None, 1), (1, 'name', 'VARCHAR(10)', 0, None, 0), (2, 'applied_at', 'DATE', 0, None, 0)]
-
-        return {}
+        return {"name" : cls()._name, "fields" : schemas, "table" : "create"}
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
         if not self._body:
@@ -109,4 +146,4 @@ class Model:
         if not self._field_exists(order):
             raise ValueError(f"Cannot return by value {order}")
 
-        return query_all(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC LIMIT 1")
+        return query_one(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC")

@@ -27,7 +27,7 @@ def query_all(query: str) -> List:
     return rows
 
 
-def query_one(query: str) -> List:
+def query_one(query: str) -> tuple:
     print('one_query: ', query)
 
     cursor.execute(query)

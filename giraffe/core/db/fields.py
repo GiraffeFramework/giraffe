@@ -38,6 +38,7 @@ class Field:
             "notnull": not self.nullable,
             "dflt_value": self.default,
             "pk": self.primary_key,
+            "mode": "create"
         }
 
 

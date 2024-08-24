@@ -28,51 +28,38 @@ def execute(args):
 
     # Add migration table for initial migrations
     if not version:
+        migration_name = "0.json"
+        
         models.append(Migration)
+
+    else:
+        migration_name = f"{int(version.name.split('.')[0]) + 1}.json"
 
     if not models:
         print("No migrations available.")
 
-        Migration()._get_db_schema()
+        return
+    
+    if os.path.join(MIGRATIONS_DIR, migration_name):
+        print(f"Run `giraffe migrate {migration_name.split('.')[0]}` first before you can initiate a new migration.")
 
         return
     
     MIGRATIONS_DIR.mkdir(exist_ok=True)
 
-    if version:
-        with open(MIGRATIONS_DIR / f'{version.name}.json') as file:
-            old_schemas = json.load(file)
-
-    else:
-        old_schemas = []
-
-    migration_name = f'{sum(1 for entry in MIGRATIONS_DIR.iterdir() if entry.is_file())}.json'
-
     with open(os.path.join(MIGRATIONS_DIR, migration_name), 'w') as file:
         schemas: list = []
 
         for model in models:
-            model()._get_db_schema()
+            model: Model
 
-            schema = model.get_schema()
-
-            if not version:
-                schema['table'] = "create"
-
-            # COMPARE TO OLD SCHEMAS
+            schema = model.get_schema_changes()
 
             schemas.append(schema)
 
         json.dump(schemas, file, indent=4)
 
     return
-    
-    with open(os.path.join(MIGRATIONS_DIR, migration_name)) as f:
-        sql = f.read()
-
-    execute_script(sql)
-
-    Migration({'name' : migration_name}).create()
 
 
 def _get_models() -> list:

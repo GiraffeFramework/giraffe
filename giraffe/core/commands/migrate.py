@@ -49,4 +49,4 @@ def execute(args):
 
 
 def _get_field(field: dict):
-    return f"{field['name']} {field['type']}{' PRIMARY KEY' if field['primary_key'] else ''}"
+    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}"
