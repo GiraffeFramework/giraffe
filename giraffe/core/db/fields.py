@@ -13,6 +13,7 @@ class Field:
         if not _is_valid(name, str, "name"):
             raise ValueError(f"Invalid field, name= argument is required.")
         
+        self.value: Any = None
         self.type = type
         self.name = name
         self.nullable = nullable
@@ -58,6 +59,16 @@ class String(Field):
                 raise ValueError(f"Invalid default '{default}' provided")
             
             self.default = default
+
+    def __get__(self, instance: Any, owner: Any) -> str:
+        # When the field is accessed, return its value as a string
+        return self.value
+
+    def __set__(self, instance: Any, value: str) -> None:
+        # When a value is assigned, store it internally
+        if not isinstance(value, str):
+            raise TypeError("Expected a string")
+        self.value = value
 
 
 class Integer(Field):

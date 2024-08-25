@@ -1,10 +1,11 @@
-from .connections import change_db, query_all, query_one
+from .connections import query_all
 from .fields import Field
 
-from typing import Tuple, Dict, Optional, Any, List, Type, TypeVar, TYPE_CHECKING, Generic, cast, ClassVar, Self
+from typing_extensions import Self
 
-if TYPE_CHECKING:
-    from .queries import Query
+from typing import Tuple, Dict, Optional, TypeVar, TYPE_CHECKING
+
+
     
 
 def _schema_from_table_info(table_info: Tuple) -> dict:
@@ -21,19 +22,20 @@ T = TypeVar('T', bound='Model')
 
 
 class Model:
-    query: Query[Self]
+    if TYPE_CHECKING:
+        from .queries import Query
+        query: Query[Self]
 
     def __init__(self, body: Optional[Dict] = None) -> None:
         self.__tablename__: str = ''
-        self._body: Dict | None = body
-        self._name: str = self._get_name()
+        self._table_name: str = self._get_table_name()
 
         return None
     
     def _field_exists(self, field: str) -> bool:
         return hasattr(self, field)
     
-    def _get_name(self) -> str:
+    def _get_table_name(self) -> str:
         if self._field_exists('__tablename__') and self.__tablename__:
             return self._valid_table_name(self.__tablename__)
         
@@ -48,10 +50,6 @@ class Model:
         
         return name
     
-    @property
-    def name(self) -> str:
-        return self._name
-    
     @classmethod
     def get_schema_changes(cls) -> dict:
         """
@@ -61,7 +59,7 @@ class Model:
         [(cid, name, type, notnull, dflt_value, pk), (...)]
         """
 
-        old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls()._name})")
+        old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls()._table_name})")
         schemas: list[dict] = []
 
         print('old_schemas: ', old_schemas)
@@ -84,7 +82,7 @@ class Model:
 
         print('schemas: ', schemas)
 
-        return {"name" : cls()._name, "fields" : schemas, "table" : "alter"}
+        return {"name" : cls()._table_name, "fields" : schemas, "table" : "alter"}
     
     @classmethod
     def get_schema(cls) -> dict:
@@ -106,7 +104,7 @@ class Model:
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {"name": cls()._name, "fields": schemas, "table": "create"}
+        return {"name": cls()._table_name, "fields": schemas, "table": "create"}
 
 
 """

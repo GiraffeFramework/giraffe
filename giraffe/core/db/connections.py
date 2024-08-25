@@ -22,7 +22,7 @@ def query_all(query: str) -> List:
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    print(rows)
+    print('all_query_result: ', rows)
 
     return rows
 
@@ -33,7 +33,7 @@ def query_one(query: str) -> tuple:
     cursor.execute(query)
     rows = cursor.fetchone()
 
-    print(rows)
+    print('one_query_result: ', rows)
 
     return rows
 

@@ -9,7 +9,7 @@ setup(
         'requests>=2.30.0',
         'orjson>3.10.7'
     ],
-    python_requires='>=3.11',
+    python_requires='>=3.8',
     author='Torben Petré (kipteamm)',
     author_email='contact@kipteam.net',
     description='A simple web framework',

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Union
+from typing import Optional
 
 from pathlib import Path
 
@@ -11,7 +11,6 @@ import argparse
 import inspect
 import json
 import sys
-import os
 
 
 MIGRATIONS_DIR = Path.cwd() / 'migrations'
@@ -40,14 +39,14 @@ def execute(args):
 
         return
     
-    if os.path.join(MIGRATIONS_DIR, migration_name):
+    if (MIGRATIONS_DIR / migration_name).exists():
         print(f"Run `giraffe migrate {migration_name.split('.')[0]}` first before you can initiate a new migration.")
 
         return
     
     MIGRATIONS_DIR.mkdir(exist_ok=True)
 
-    with open(os.path.join(MIGRATIONS_DIR, migration_name), 'w') as file:
+    with open(MIGRATIONS_DIR / migration_name, 'w') as file:
         schemas: list = []
 
         for model in models:
@@ -97,9 +96,7 @@ def _get_models() -> list:
 
 
 def _get_version() -> Optional[Migration]:
-    """
-    Returns current database version.
-    """
+    # Returns current database version.
 
     try:
         return Migration.query.latest('applied_at')
