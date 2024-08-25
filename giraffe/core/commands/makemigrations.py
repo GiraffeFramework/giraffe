@@ -102,7 +102,7 @@ def _get_version() -> Optional[Migration]:
     """
 
     try:
-        return Migration().latest('applied_at')
+        return Migration.query.latest('applied_at')
     
     except:
         return None

@@ -1,8 +1,10 @@
+from .connections import change_db, query_all, query_one
 from .fields import Field
 
-from typing import Tuple, Dict, Optional, Any, List
+from typing import Tuple, Dict, Optional, Any, List, Type, TypeVar, TYPE_CHECKING, Generic, cast, ClassVar, Self
 
-from .connections import change_db, query_all, query_one
+if TYPE_CHECKING:
+    from .queries import Query
     
 
 def _schema_from_table_info(table_info: Tuple) -> dict:
@@ -15,7 +17,12 @@ def _schema_from_table_info(table_info: Tuple) -> dict:
     }
 
 
+T = TypeVar('T', bound='Model')
+
+
 class Model:
+    query: Query[Self]
+
     def __init__(self, body: Optional[Dict] = None) -> None:
         self.__tablename__: str = ''
         self._body: Dict | None = body
@@ -36,7 +43,7 @@ class Model:
         if len(name) > 128:
             raise ValueError("Table name cannot be longer than 128 characters")
         
-        if not name.isalnum():
+        if not name.replace('_', '').isalnum():
             raise ValueError("Table name cannot contain non-alphanumeric characters")
         
         return name
@@ -91,20 +98,24 @@ class Model:
             if value.primary_key:
                 if primary_key:
                     raise ValueError("Model can only have one primary key")
-                    
+                
                 primary_key = True
 
-            schema = value.get_schema(key)
-
-            schemas.append(schema)
+            schemas.append(value.get_schema(key))
 
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {"name" : cls()._name, "fields" : schemas, "table" : "create"}
+        return {"name": cls()._name, "fields": schemas, "table": "create"}
+
+
+"""
+class Query:
+    def __init__(self, model: Model) -> None:
+        self.model: Model = model
 
     def create(self, *required_fields) -> Tuple[Any, Dict]:
-        if not self._body:
+        if not self.model._body:
             return None, {'status' : 400, 'error' : "No body"}
 
         invalid_fields: List = []
@@ -112,10 +123,10 @@ class Model:
         for arg in required_fields:
             field: Field = arg
 
-            if not field.name in self._body:
+            if not field.name in self.model._body:
                 invalid_fields.append(field.name)
 
-            value = self._body[field.name]
+            value = self.model._body[field.name]
             valid, error = field.valid(value)
 
             if not valid:
@@ -124,26 +135,34 @@ class Model:
         if invalid_fields:
             return None, {'status' : 400, 'error' : f"Invalid {', '.join(invalid_fields)}"}
         
-        fields = ', '.join(self._body.keys())
-        values = ', '.join(f"'{self._body[field]}'" for field in self._body.keys())
+        fields = ', '.join(self.model._body.keys())
+        values = ', '.join(f"'{self.model._body[field]}'" for field in self.model._body.keys())
 
-        query = f"INSERT INTO {self._name} ({fields}) VALUES ({values})"
+        query = f"INSERT INTO {self.model._name} ({fields}) VALUES ({values})"
 
         change_db(query)
         
         return None, {'status' : 200, 'error' : "THERE WAS NONE!"}
 
     def all(self, order: Optional[str]=None, value: Optional[str]=None) -> List:
-        if order and not self._field_exists(order.replace('-', '')):
+        if order and not self.model._field_exists(order.replace('-', '')):
             raise ValueError(f"Cannot order by {order}")
         
-        if value and not self._field_exists(value):
+        if value and not self.model._field_exists(value):
             raise ValueError(f"Cannot return by value {value}")
 
-        return query_all(f"SELECT {value if value else '*'} FROM {self._name}{f' ORDER BY {order}' if order else ''}")
+        return query_all(f"SELECT {value if value else '*'} FROM {self.model._name}{f' ORDER BY {order}' if order else ''}")
     
-    def latest(self, order: str, value: Optional[str]=None) -> List:
-        if not self._field_exists(order):
-            raise ValueError(f"Cannot return by value {order}")
+    @classmethod
+    def latest(cls: Type[T]) -> Optional[T]:
+        # Assuming there is a `Date` or `DateTime` field named `applied_at`
+        table_name = cls()._name
+        query = f"SELECT * FROM {table_name} ORDER BY applied_at DESC LIMIT 1;"
+        result = query_one(query)
 
-        return query_one(f"SELECT {value if value else '*'} FROM {self._name} ORDER BY {order} DESC")
+        if result:
+            # Dynamically create an instance of the class
+            instance = cls(body=result)
+            return instance
+        return None
+"""
