@@ -1,11 +1,10 @@
 from .connections import query_all
+from .queries import Query
 from .fields import Field
 
 from typing_extensions import Self
 
-from typing import Tuple, Dict, Optional, TypeVar, TYPE_CHECKING
-
-
+from typing import Tuple, Dict, Optional, TypeVar
     
 
 def _schema_from_table_info(table_info: Tuple) -> dict:
@@ -22,26 +21,18 @@ T = TypeVar('T', bound='Model')
 
 
 class Model:
-    if TYPE_CHECKING:
-        from .queries import Query
-        query: Query[Self]
-
+    query: Query[Self]
+        
     def __init__(self, body: Optional[Dict] = None) -> None:
+        self._body: Optional[Dict] = body
         self.__tablename__: str = ''
-        self._table_name: str = self._get_table_name()
 
         return None
     
     def _field_exists(self, field: str) -> bool:
         return hasattr(self, field)
     
-    def _get_table_name(self) -> str:
-        if self._field_exists('__tablename__') and self.__tablename__:
-            return self._valid_table_name(self.__tablename__)
-        
-        return self._valid_table_name(self.__class__.__name__.lower())
-    
-    def _valid_table_name(self, name: str) -> str:
+    def _valid_tablename(self, name: str) -> str:
         if len(name) > 128:
             raise ValueError("Table name cannot be longer than 128 characters")
         
@@ -49,6 +40,12 @@ class Model:
             raise ValueError("Table name cannot contain non-alphanumeric characters")
         
         return name
+    
+    def get_tablename(self) -> str:
+        if self._field_exists('__tablename__') and self.__tablename__:
+            return self._valid_tablename(self.__tablename__)
+        
+        return self._valid_tablename(self.__class__.__name__.lower())
     
     @classmethod
     def get_schema_changes(cls) -> dict:
@@ -59,7 +56,8 @@ class Model:
         [(cid, name, type, notnull, dflt_value, pk), (...)]
         """
 
-        old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls()._table_name})")
+        old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls().get_tablename()})")
+        schema_keys: list[str] = []
         schemas: list[dict] = []
 
         print('old_schemas: ', old_schemas)
@@ -70,19 +68,28 @@ class Model:
         for old_schema in old_schemas:
             field: Optional[Field] = cls.__dict__.get(old_schema[1], None)
 
-            if not field:
-                schema = _schema_from_table_info(old_schema)
-                schema['mode'] = 'delete'
-
-            else:
+            if field:
                 schema = field.get_schema(old_schema[1])
                 schema['mode'] = 'update'
 
+            else:
+                schema = _schema_from_table_info(old_schema)
+                schema['mode'] = 'delete'
+                
+            schema_keys.append(old_schema[1])
             schemas.append(schema)
+
+        for key, value in cls.__dict__.items():
+            if not isinstance(value, Field):
+                continue
+
+            if not key in schema_keys:
+                schema = value.get_schema(key)
+                schema['mode'] = 'create'
 
         print('schemas: ', schemas)
 
-        return {"name" : cls()._table_name, "fields" : schemas, "table" : "alter"}
+        return {"name" : cls().get_tablename(), "fields" : schemas, "table" : "alter"}
     
     @classmethod
     def get_schema(cls) -> dict:
@@ -104,7 +111,7 @@ class Model:
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {"name": cls()._table_name, "fields": schemas, "table": "create"}
+        return {"name": cls().get_tablename(), "fields": schemas, "table": "create"}
 
 
 """

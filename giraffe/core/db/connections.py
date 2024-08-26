@@ -11,7 +11,10 @@ def change_db(action: str) -> List:
     print('change_query: ', action)
 
     cursor.execute(action)
+    rows = cursor.fetchall()
     conn.commit()
+
+    print('change_db_result: ', rows)
 
     return []
 

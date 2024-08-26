@@ -45,7 +45,9 @@ def execute(args):
     
     execute_script(migration_steps)
 
-    Migration({'name' : args.migration}).query.create()
+    migration, errors = Migration({'name' : args.migration}).query.create()
+
+    print(migration, errors)
 
 
 def _get_field(field: dict):

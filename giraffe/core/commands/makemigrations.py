@@ -21,7 +21,6 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 
 def execute(args):
-    # Get models and current version
     models = _get_models()
     version = _get_version()
 
