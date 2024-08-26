@@ -12,11 +12,13 @@ T = TypeVar('T', bound='Model')
 
 
 class Query(Generic[T]):
-    def __init__(self, model: Type[T]):
-        self.model = model
+    # TODO: Fix instance (so you don't have to call Migration() (or any model) and idk how)
+
+    def __init__(self, instance: T):
+        self.instance = instance
 
     def create(self, *required_fields: Field) -> Tuple[Optional[T], Dict]:
-        body: Optional[Dict] = self.model()._body
+        body: Optional[Dict] = self.instance._body
 
         if not body:
             return None, {'status' : 400, 'error' : "No body"}
@@ -39,20 +41,22 @@ class Query(Generic[T]):
         fields = ', '.join(body.keys())
         values = ', '.join(f"'{body[field]}'" for field in body.keys())
 
-        result = change_db(f"INSERT INTO {self.model().get_tablename()} ({fields}) VALUES ({values})")
+        result = change_db(f"INSERT INTO {self.instance.get_tablename()} ({fields}) VALUES ({values})")
 
-        return self.model(), {}
+        print(result)
+
+        return self.instance, {}
     
     def latest(self, date_field: str) -> Optional[T]:
-        if not self.model()._field_exists(date_field):
+        if not self.instance.field_exists(date_field):
             raise ValueError(f"Cannot return by date field {date_field}")
 
         # Replace with actual query logic
-        query = f"SELECT * FROM {self.model().get_tablename()} ORDER BY {date_field} DESC LIMIT 1;"
+        query = f"SELECT * FROM {self.instance.get_tablename()} ORDER BY {date_field} DESC LIMIT 1;"
         
         result = query_one(query)
 
         if result:
-            return self.model()
+            return self.instance
         
         return None
