@@ -4,7 +4,7 @@ from .fields import Field
 
 from typing_extensions import Self
 
-from typing import Tuple, Dict, Optional, TypeVar, Type
+from typing import Tuple, Dict, Optional, TypeVar, Type, Dict, List
     
 
 def _schema_from_table_info(table_info: Tuple) -> dict:
@@ -23,9 +23,12 @@ T = TypeVar('T', bound='Model')
 class Model:
     query: Query[Self]
 
-    def __init__(self, body: Optional[Dict] = None) -> None:
+    def __init__(self, body: Optional[Dict] = None, **kwargs) -> None:
         self._body: Optional[Dict] = body
         self.__tablename__: str = ''
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __init_subclass__(cls: Type[T], **kwargs):
         super().__init_subclass__(**kwargs)
@@ -39,6 +42,18 @@ class Model:
             raise ValueError("Table name cannot contain non-alphanumeric characters")
         
         return name
+    
+    @classmethod
+    def _get_column_names(cls):
+        names: List[str] = []
+
+        for key, value in cls.__dict__.items():
+            if not isinstance(value, Field):
+                continue
+
+            names.append(value.name)
+
+        return names
     
     def field_exists(self, field: str) -> bool:
         return hasattr(self, field)
@@ -111,3 +126,9 @@ class Model:
             raise ValueError("Model must have a primary key")
 
         return {"name": cls().get_tablename(), "fields": schemas, "table": "create"}
+    
+    @classmethod
+    def from_db(cls, row: Tuple) -> 'Model':
+        field_names = cls._get_column_names()
+        field_values = dict(zip(field_names, row))
+        return cls(**field_values)

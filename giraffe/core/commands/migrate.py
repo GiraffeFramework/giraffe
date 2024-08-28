@@ -38,8 +38,12 @@ def execute(args):
 
     migration, errors = Migration.query.create(body={'name' : args.migration}, required_fields=[Migration.name])
 
-    if errors:
+    if not migration:
         print(f"Creating migration instance raised error: {errors['error']}")
+
+        return
+    
+    print(f"Migration {args.migration} applied successfully.")
     
 
 def _get_migration_steps(migration: list) -> str:
@@ -58,4 +62,4 @@ def _get_migration_steps(migration: list) -> str:
 
 
 def _get_field(field: dict):
-    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}"
+    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}{' AUTOINCREMENT' if field['pk'] and not field['dflt_value'] and field['type'] == 'INTEGER' else ''}{' DEFAULT ' + str(field['dflt_value']) if field['dflt_value'] else ''}"

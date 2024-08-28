@@ -1,6 +1,4 @@
-from typing import Any, Optional, Tuple, Type, Generic, TypeVar, Union, overload, Callable
-
-from dataclasses import dataclass, field
+from typing import Any, Optional, Tuple, Type, Generic, TypeVar, Union, overload
 
 
 def _is_valid(value: Any, expected_type: Type, name: str) -> bool:
@@ -14,7 +12,7 @@ T = TypeVar('T')
 
 
 class Field(Generic[T]):
-    def __init__(self, type: str, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+    def __init__(self, type: str, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False, default: Optional[Any]=None) -> None:
         # TODO: if not name value specified, inherit name from declaration (field_name = _String() -> "field_name")
         if not _is_valid(name, str, "name"):
             raise ValueError(f"Invalid field, name= argument is required.")
@@ -25,7 +23,7 @@ class Field(Generic[T]):
         self.nullable = nullable
         self.primary_key = primary_key
         self.unique = unique
-        self.default = None
+        self.default = default
         self.max_length = None
         self.min_length = None
 
@@ -61,13 +59,11 @@ class Field(Generic[T]):
         return self.value
 
     def __set__(self, instance: Any, value: str) -> None:
-        # When a value is assigned, store it internally
-        if not isinstance(value, str):
-            raise TypeError("Expected a _String")
+        # type checking
+
         self.value = value
 
 
-@dataclass
 class _String(Field[str]):
     def __init__(self, name: str, max_length: Optional[int] = 255, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__('VARCHAR', name, nullable, primary_key, unique)
@@ -88,7 +84,7 @@ class _String(Field[str]):
 
 class _Integer(Field[int]):
     def __init__(self, name: str, default: Optional[int] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('INT', name, nullable, primary_key, unique)
+        super().__init__('INTEGER', name, nullable, primary_key, unique)
 
         if default is not None and _is_valid(default, int, "default"):
             self.default = default
@@ -103,8 +99,11 @@ class _Float(Field[float]):
 
 
 class _Date(Field):
-    def __init__(self, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
-        super().__init__('DATE', name, nullable, primary_key, unique)
+    def __init__(self, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False, default: Optional[Any]=None) -> None:
+        if not default:
+            default = "CURRENT_TIMESTAMP"
+        
+        super().__init__('DATE', name, nullable, primary_key, unique, default)
 
 
 class Fields:

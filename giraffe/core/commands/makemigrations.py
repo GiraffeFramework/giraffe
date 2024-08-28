@@ -52,7 +52,7 @@ def execute(args):
     with open(MIGRATIONS_DIR / migration_name, 'w') as file:
         json.dump(schemas, file, indent=4)
 
-    return
+    print(f"Migration {migration_name} created successfully.")
 
 
 def _get_models() -> List:

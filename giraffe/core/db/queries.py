@@ -39,11 +39,14 @@ class Query(Generic[T]):
         fields = ', '.join(body.keys())
         values = ', '.join(f"'{body[field]}'" for field in body.keys())
 
-        result = change_db(f"INSERT INTO {self.model().get_tablename()} ({fields}) VALUES ({values})")
+        last_id = change_db(f"INSERT INTO {self.model().get_tablename()} ({fields}) VALUES ({values})")
 
-        print(result)
+        if not last_id:
+            return None, {'status': 500, 'error': 'Failed to create record'}
+        
+        new_record = query_one(f"SELECT * FROM {self.model().get_tablename()} WHERE id = {last_id}")
 
-        return self.model(), {}
+        return self.model.from_db(new_record), {}
     
     def latest(self, date_field: str) -> Optional[T]:
         if not self.model().field_exists(date_field):
@@ -55,6 +58,6 @@ class Query(Generic[T]):
         result = query_one(query)
 
         if result:
-            return self.model()
+            return self.model.from_db(result)
         
         return None
