@@ -45,7 +45,7 @@ def execute(args):
     
     execute_script(migration_steps)
 
-    migration, errors = Migration({'name' : args.migration}).query.create()
+    migration, errors = Migration.query.create(body={'name' : args.migration}, required_fields=[Migration.name])
 
     print(migration, errors)
 

@@ -1,4 +1,6 @@
-from typing import Any, Optional, Tuple, Type
+from typing import Any, Optional, Tuple, Type, Generic, TypeVar, Union, overload, Callable
+
+from dataclasses import dataclass, field
 
 
 def _is_valid(value: Any, expected_type: Type, name: str) -> bool:
@@ -8,8 +10,12 @@ def _is_valid(value: Any, expected_type: Type, name: str) -> bool:
     return True
 
 
-class Field:
-    def __init__(self, type: str, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False):
+T = TypeVar('T')
+
+
+class Field(Generic[T]):
+    def __init__(self, type: str, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+        # TODO: if not name value specified, inherit name from declaration (field_name = _String() -> "field_name")
         if not _is_valid(name, str, "name"):
             raise ValueError(f"Invalid field, name= argument is required.")
         
@@ -41,10 +47,29 @@ class Field:
             "pk": self.primary_key,
             "mode": "create"
         }
+    
+    @overload
+    def __get__(self, instance: None, owner: Any) -> "Field[T]": ...
+    
+    @overload
+    def __get__(self, instance: Any, owner: Any) -> T: ...
+    
+    def __get__(self, instance: Any, owner: Any) -> Union[T, "Field[T]"]:
+        if instance is None:
+            return self
+        # When the field is accessed, return its value as a _String
+        return self.value
+
+    def __set__(self, instance: Any, value: str) -> None:
+        # When a value is assigned, store it internally
+        if not isinstance(value, str):
+            raise TypeError("Expected a _String")
+        self.value = value
 
 
-class String(Field):
-    def __init__(self, name: str, max_length: Optional[int] = 1, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
+@dataclass
+class _String(Field[str]):
+    def __init__(self, name: str, max_length: Optional[int] = 255, min_length: Optional[int] = 0, default: Optional[str] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__('VARCHAR', name, nullable, primary_key, unique)
 
         if max_length is not None and _is_valid(max_length, int, "max_length"):
@@ -60,18 +85,8 @@ class String(Field):
             
             self.default = default
 
-    def __get__(self, instance: Any, owner: Any) -> str:
-        # When the field is accessed, return its value as a string
-        return self.value
 
-    def __set__(self, instance: Any, value: str) -> None:
-        # When a value is assigned, store it internally
-        if not isinstance(value, str):
-            raise TypeError("Expected a string")
-        self.value = value
-
-
-class Integer(Field):
+class _Integer(Field[int]):
     def __init__(self, name: str, default: Optional[int] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__('INT', name, nullable, primary_key, unique)
 
@@ -79,7 +94,7 @@ class Integer(Field):
             self.default = default
 
 
-class Float(Field):
+class _Float(Field[float]):
     def __init__(self, name: str, default: Optional[float] = None, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__('FLOAT', name, nullable, primary_key, unique)
 
@@ -87,15 +102,15 @@ class Float(Field):
             self.default = default
 
 
-class Date(Field):
+class _Date(Field):
     def __init__(self, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False) -> None:
         super().__init__('DATE', name, nullable, primary_key, unique)
 
 
 class Fields:
-    String = String
-    Integer = Integer
-    Float = Float
-    Date = Date
+    String = _String
+    Integer = _Integer
+    Float = _Float
+    Date = _Date
 
 fields = Fields()
