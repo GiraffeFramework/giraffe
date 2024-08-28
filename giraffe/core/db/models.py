@@ -29,7 +29,7 @@ class Model:
 
     def __init_subclass__(cls: Type[T], **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.query = Query(cls)
+        cls.query = Query(cls) # type: ignore
     
     def _valid_tablename(self, name: str) -> str:
         if len(name) > 128:
@@ -53,9 +53,6 @@ class Model:
     def get_schema_changes(cls) -> dict:
         """
         Loop over existing schemas from the databse and compare them to the current schema.
-
-        PRAGMA table_info(table_name) returns a list of tuples with the following structure:  
-        [(cid, name, type, notnull, dflt_value, pk), (...)]
         """
 
         old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls().get_tablename()})")

@@ -27,16 +27,7 @@ def execute(args):
     with open(migration) as file:
         migration = json.load(file)
 
-    migration_steps: str = ""
-
-    for schema in migration:
-        if schema['table'] == 'create':
-            migration_steps += f" CREATE TABLE IF NOT EXISTS {schema['name']} ({', '.join(_get_field(field) for field in schema['fields'])});"
-
-        else:
-            # TODO
-
-            print('incoming')
+    migration_steps = _get_migration_steps(migration)
 
     if not migration_steps:
         print("No migrations available.")
@@ -47,7 +38,23 @@ def execute(args):
 
     migration, errors = Migration.query.create(body={'name' : args.migration}, required_fields=[Migration.name])
 
-    print(migration, errors)
+    if errors:
+        print(f"Creating migration instance raised error: {errors['error']}")
+    
+
+def _get_migration_steps(migration: list) -> str:
+    migration_steps: str = ''
+
+    for schema in migration:
+        if schema['table'] == 'create':
+            migration_steps += f" CREATE TABLE IF NOT EXISTS {schema['name']} ({', '.join(_get_field(field) for field in schema['fields'])});"
+
+        else:
+            # TODO
+
+            print('incoming')
+
+    return migration_steps
 
 
 def _get_field(field: dict):

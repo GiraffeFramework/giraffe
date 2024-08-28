@@ -14,7 +14,7 @@ T = TypeVar('T', bound='Model')
 class Query(Generic[T]):
     # TODO: Fix model (so you don't have to call Migration() (or any model) and idk how)
 
-    def __init__(self, model: T):
+    def __init__(self, model: Type[T]):
         self.model = model
 
     def create(self, body: dict, required_fields: List[Field]=[]) -> Tuple[Optional[T], Dict]:
@@ -39,22 +39,22 @@ class Query(Generic[T]):
         fields = ', '.join(body.keys())
         values = ', '.join(f"'{body[field]}'" for field in body.keys())
 
-        result = change_db(f"INSERT INTO {self.model.get_tablename()} ({fields}) VALUES ({values})")
+        result = change_db(f"INSERT INTO {self.model().get_tablename()} ({fields}) VALUES ({values})")
 
         print(result)
 
-        return self.model, {}
+        return self.model(), {}
     
     def latest(self, date_field: str) -> Optional[T]:
-        if not self.model.field_exists(date_field):
+        if not self.model().field_exists(date_field):
             raise ValueError(f"Cannot return by date field {date_field}")
 
         # Replace with actual query logic
-        query = f"SELECT * FROM {self.model.get_tablename()} ORDER BY {date_field} DESC LIMIT 1;"
+        query = f"SELECT * FROM {self.model().get_tablename()} ORDER BY {date_field} DESC LIMIT 1;"
         
         result = query_one(query)
 
         if result:
-            return self.model
+            return self.model()
         
         return None

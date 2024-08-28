@@ -20,7 +20,7 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 
 def execute(args):
-    version: Migration | None = Migration.query.latest('applied_at')
+    version: Migration | None = _get_version()
     models = _get_models() # TODO: Fix typehint
 
     # Add migration table for initial migrations
@@ -87,3 +87,15 @@ def _get_models() -> List:
             models.append(obj)
 
     return models
+
+
+def _get_version() -> Optional[Migration]:
+    """
+    Get the latest migration version.
+    """
+
+    try:
+        return Migration.query.latest('applied_at')
+    
+    except:
+        return None
