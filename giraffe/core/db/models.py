@@ -66,10 +66,9 @@ class Model:
     
     @classmethod
     def get_schema_changes(cls) -> Optional[dict]:
-        """
-        Loop over existing schemas from the databse and compare them to the current schema.
-        """
-
+        """Loop over existing schemas from the database and compare them to the current schema. Detects added, removed, modified, and renamed fields."""
+        
+        dropped_schemas: list[tuple] = []
         alter_schemas: list[dict] = []
         old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls().get_tablename()})")
         schema_keys: list[str] = []
@@ -92,16 +91,30 @@ class Model:
 
             else:
                 schema = {'name' : old_schema[1], 'mode' : 'drop'}
-
                 alter_schemas.append(schema)
+                dropped_schemas.append(old_schema)
 
         for key, value in cls.__dict__.items():
             if not isinstance(value, Field):
                 continue
 
             if not key in schema_keys:
-                schema = value.get_schema(key)
-                schema['mode'] = 'add'
+                schema = {}
+
+                for old_schema in dropped_schemas:
+                    if not value.get_schema_changes(old_schema):
+                        schema = {
+                            'old_name' : old_schema[1],
+                            'new_name' : key,
+                            'mode' : 'rename'
+                        }
+
+                        alter_schemas.remove({'name' : old_schema[1], 'mode' : 'drop'})
+
+                if not schema:
+                    schema = value.get_schema(key)
+                    schema['mode'] = 'add'
+
                 alter_schemas.append(schema)
 
         if not alter_schemas:

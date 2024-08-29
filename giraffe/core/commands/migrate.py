@@ -24,7 +24,7 @@ def execute(args):
         print("Migration {args.migration} not found.")
 
         return
-    
+
     with open(migration) as file:
         migration = json.load(file)
 
@@ -43,9 +43,9 @@ def execute(args):
         print(f"Creating migration instance raised error: {errors['error']}")
 
         return
-    
+
     print(f"Migration {args.migration} applied successfully.")
-    
+
 
 def _get_migration_steps(migration: List[dict]) -> str:
     """Generate SQL migration steps for each table schema."""
@@ -73,6 +73,9 @@ def _get_alter_statements(tablename: str, alterations: List[dict]) -> str:
 
         elif alter['mode'] == 'add':
             alter_statements += f"ALTER TABLE {tablename} ADD COLUMN {_get_field(alter)};"
+
+        elif alter['mode'] == 'rename':
+            alter_statements += f"ALTER TABLE {tablename} RENAME COLUMN {alter['old_name']} TO {alter['new_name']};"
 
     return alter_statements
 
