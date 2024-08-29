@@ -65,7 +65,7 @@ class Model:
         return self._valid_tablename(self.__class__.__name__.lower())
     
     @classmethod
-    def get_schema_changes(cls) -> dict:
+    def get_schema_changes(cls) -> Optional[dict]:
         """
         Loop over existing schemas from the databse and compare them to the current schema.
         """
@@ -83,15 +83,15 @@ class Model:
             field: Optional[Field] = cls.__dict__.get(old_schema[1], None)
 
             if field:
-                schema = field.get_schema(old_schema[1])
-                schema['mode'] = 'update'
+                schema = field.get_schema_changes(old_schema)
 
             else:
-                schema = _schema_from_table_info(old_schema)
-                schema['mode'] = 'delete'
+                schema = {'name' : old_schema[1], 'mode' : 'delete'}
                 
             schema_keys.append(old_schema[1])
-            schemas.append(schema)
+
+            if schema:
+                schemas.append(schema)
 
         for key, value in cls.__dict__.items():
             if not isinstance(value, Field):
@@ -100,6 +100,10 @@ class Model:
             if not key in schema_keys:
                 schema = value.get_schema(key)
                 schema['mode'] = 'create'
+                schemas.append(schema)
+
+        if not schemas:
+            return None
 
         print('schemas: ', schemas)
 

@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar, List, Type, Union
+from typing import Optional, List, Type
 
 from pathlib import Path
 
@@ -21,7 +21,7 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 def execute(args):
     version: Migration | None = _get_version()
-    models = _get_models() # TODO: Fix typehint
+    models: List[Type[Model]] = _get_models()
 
     # Add migration table for initial migrations
     if not version:
@@ -47,7 +47,15 @@ def execute(args):
     schemas: list = []
 
     for model in models:
-        schemas.append(model.get_schema_changes())
+        changes = model.get_schema_changes()
+
+        if changes:
+            schemas.append(changes)
+
+    if not changes:
+        print("No migrations available.")
+
+        return
 
     with open(MIGRATIONS_DIR / migration_name, 'w') as file:
         json.dump(schemas, file, indent=4)
@@ -55,7 +63,7 @@ def execute(args):
     print(f"Migration {migration_name} created successfully.")
 
 
-def _get_models() -> List:
+def _get_models() -> List[Type[Model]]:
     """
     Get all model class objects defined in models.py files at the custom framework app level.
     """

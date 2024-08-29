@@ -12,8 +12,6 @@ T = TypeVar('T', bound='Model')
 
 
 class Query(Generic[T]):
-    # TODO: Fix model (so you don't have to call Migration() (or any model) and idk how)
-
     def __init__(self, model: Type[T]):
         self.model = model
 

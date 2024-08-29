@@ -13,7 +13,6 @@ T = TypeVar('T')
 
 class Field(Generic[T]):
     def __init__(self, type: str, name: str, nullable: bool = True, primary_key: bool = False, unique: bool = False, default: Optional[Any]=None) -> None:
-        # TODO: if not name value specified, inherit name from declaration (field_name = _String() -> "field_name")
         if not _is_valid(name, str, "name"):
             raise ValueError(f"Invalid field, name= argument is required.")
         
@@ -45,6 +44,29 @@ class Field(Generic[T]):
             "pk": self.primary_key,
             "mode": "create"
         }
+    
+    def get_schema_changes(self, old_schema: tuple) -> Optional[dict]:
+        schema = {}
+
+        if self.type != old_schema[2]:
+            schema["type"] = self.type
+
+        if self.nullable == old_schema[3]:
+            schema["notnull"] = not self.nullable
+
+        if self.default != old_schema[4]:
+            schema["dflt_value"] = self.default
+
+        if self.primary_key != old_schema[5]:
+            schema["pk"] = self.primary_key
+
+        if not schema:
+            return None
+        
+        schema["name"] = old_schema[1]
+        schema["mode"] = "alter"
+
+        return schema
     
     @overload
     def __get__(self, instance: None, owner: Any) -> "Field[T]": ...
