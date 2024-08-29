@@ -29,10 +29,10 @@ class Field(Generic[T]):
     def valid(self, value: str) -> Tuple[bool, str]:
         if self.max_length and len(value) > self.max_length:
             return False, "Maximum length exceeded"
-            
+                
         if self.min_length and len(value) < self.min_length:
             return False, "Minimum length not reached"
-            
+        
         return True, ""
     
     def get_schema(self, name: str) -> dict:
@@ -42,7 +42,6 @@ class Field(Generic[T]):
             "notnull": not self.nullable,
             "dflt_value": self.default,
             "pk": self.primary_key,
-            "mode": "create"
         }
     
     def get_schema_changes(self, old_schema: tuple) -> Optional[dict]:

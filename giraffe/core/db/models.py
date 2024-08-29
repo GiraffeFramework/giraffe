@@ -70,9 +70,9 @@ class Model:
         Loop over existing schemas from the databse and compare them to the current schema.
         """
 
+        alter_schemas: list[dict] = []
         old_schemas: list[tuple] = query_all(f"PRAGMA table_info({cls().get_tablename()})")
         schema_keys: list[str] = []
-        schemas: list[dict] = []
 
         print('old_schemas: ', old_schemas)
 
@@ -82,16 +82,18 @@ class Model:
         for old_schema in old_schemas:
             field: Optional[Field] = cls.__dict__.get(old_schema[1], None)
 
+            schema_keys.append(old_schema[1])
+
             if field:
                 schema = field.get_schema_changes(old_schema)
 
-            else:
-                schema = {'name' : old_schema[1], 'mode' : 'delete'}
-                
-            schema_keys.append(old_schema[1])
+                if schema:
+                    alter_schemas.append(schema)
 
-            if schema:
-                schemas.append(schema)
+            else:
+                schema = {'name' : old_schema[1], 'mode' : 'drop'}
+
+                alter_schemas.append(schema)
 
         for key, value in cls.__dict__.items():
             if not isinstance(value, Field):
@@ -99,15 +101,15 @@ class Model:
 
             if not key in schema_keys:
                 schema = value.get_schema(key)
-                schema['mode'] = 'create'
-                schemas.append(schema)
+                schema['mode'] = 'add'
+                alter_schemas.append(schema)
 
-        if not schemas:
+        if not alter_schemas:
             return None
 
-        print('schemas: ', schemas)
+        print('schemas: ', alter_schemas)
 
-        return {"name" : cls().get_tablename(), "fields" : schemas, "table" : "alter"}
+        return {"tablename" : cls().get_tablename(), "create" : [], "alter" : alter_schemas}
     
     @classmethod
     def get_schema(cls) -> dict:
@@ -129,7 +131,7 @@ class Model:
         if not primary_key:
             raise ValueError("Model must have a primary key")
 
-        return {"name": cls().get_tablename(), "fields": schemas, "table": "create"}
+        return {"tablename" : cls().get_tablename(), "create" : schemas, "alter" : [],}
     
     @classmethod
     def from_db(cls, row: Tuple) -> 'Model':

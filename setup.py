@@ -7,7 +7,7 @@ setup(
     install_requires=[
         'lxml>=5.2.2',
         'requests>=2.30.0',
-        'orjson>3.10.7'
+        'orjson>=3.10.7'
     ],
     python_requires='>=3.8',
     author='Torben Petré (kipteamm)',

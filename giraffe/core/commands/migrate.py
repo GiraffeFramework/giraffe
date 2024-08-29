@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from ..db.connections import execute_script
 from ..db.defaults import Migration
@@ -33,7 +34,7 @@ def execute(args):
         print("No migrations available.")
 
         return
-    
+
     execute_script(migration_steps)
 
     migration, errors = Migration.query.create(body={'name' : args.migration}, required_fields=[Migration.name])
@@ -46,19 +47,34 @@ def execute(args):
     print(f"Migration {args.migration} applied successfully.")
     
 
-def _get_migration_steps(migration: list) -> str:
+def _get_migration_steps(migration: List[dict]) -> str:
+    """Generate SQL migration steps for each table schema."""
     migration_steps: str = ''
 
     for schema in migration:
-        if schema['table'] == 'create':
-            migration_steps += f" CREATE TABLE IF NOT EXISTS {schema['name']} ({', '.join(_get_field(field) for field in schema['fields'])});"
+        if 'create' in schema and schema['create']:
+            create_fields = ', '.join(_get_field(field) for field in schema['create'])
+            migration_steps += f"CREATE TABLE IF NOT EXISTS {schema['tablename']} ({create_fields});"
 
-        else:
-            # TODO
-
-            print('incoming')
+        elif 'alter' in schema and schema['alter']:
+            alter_statements = _get_alter_statements(schema['tablename'], schema['alter'])
+            migration_steps += alter_statements
 
     return migration_steps
+
+
+def _get_alter_statements(tablename: str, alterations: List[dict]) -> str:
+    """Generate SQL ALTER TABLE statements."""
+    alter_statements: str = ''
+
+    for alter in alterations:
+        if alter['mode'] == 'drop':
+            alter_statements += f"ALTER TABLE {tablename} DROP COLUMN {alter['name']};"
+
+        elif alter['mode'] == 'add':
+            alter_statements += f"ALTER TABLE {tablename} ADD COLUMN {_get_field(alter)};"
+
+    return alter_statements
 
 
 def _get_field(field: dict):
