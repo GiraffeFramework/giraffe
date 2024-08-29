@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from ..db.connections import execute_script
 from ..db.defaults import Migration
@@ -23,30 +24,61 @@ def execute(args):
         print("Migration {args.migration} not found.")
 
         return
-    
+
     with open(migration) as file:
         migration = json.load(file)
 
-    migration_steps: str = ""
-
-    for schema in migration:
-        if schema['table'] == 'create':
-            migration_steps += f" CREATE TABLE IF NOT EXISTS {schema['name']} ({', '.join(_get_field(field) for field in schema['fields'])});"
-
-        else:
-            # TODO
-
-            print('incoming')
+    migration_steps = _get_migration_steps(migration)
 
     if not migration_steps:
         print("No migrations available.")
 
         return
-    
+
     execute_script(migration_steps)
 
-    Migration({'name' : args.migration}).create()
+    migration, errors = Migration.query.create(body={'name' : args.migration}, required_fields=[Migration.name])
+
+    if not migration:
+        print(f"Creating migration instance raised error: {errors['error']}")
+
+        return
+
+    print(f"Migration {args.migration} applied successfully.")
+
+
+def _get_migration_steps(migration: List[dict]) -> str:
+    """Generate SQL migration steps for each table schema."""
+    migration_steps: str = ''
+
+    for schema in migration:
+        if 'create' in schema and schema['create']:
+            create_fields = ', '.join(_get_field(field) for field in schema['create'])
+            migration_steps += f"CREATE TABLE IF NOT EXISTS {schema['tablename']} ({create_fields});"
+
+        elif 'alter' in schema and schema['alter']:
+            alter_statements = _get_alter_statements(schema['tablename'], schema['alter'])
+            migration_steps += alter_statements
+
+    return migration_steps
+
+
+def _get_alter_statements(tablename: str, alterations: List[dict]) -> str:
+    """Generate SQL ALTER TABLE statements."""
+    alter_statements: str = ''
+
+    for alter in alterations:
+        if alter['mode'] == 'drop':
+            alter_statements += f"ALTER TABLE {tablename} DROP COLUMN {alter['name']};"
+
+        elif alter['mode'] == 'add':
+            alter_statements += f"ALTER TABLE {tablename} ADD COLUMN {_get_field(alter)};"
+
+        elif alter['mode'] == 'rename':
+            alter_statements += f"ALTER TABLE {tablename} RENAME COLUMN {alter['old_name']} TO {alter['new_name']};"
+
+    return alter_statements
 
 
 def _get_field(field: dict):
-    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}"
+    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}{' AUTOINCREMENT' if field['pk'] and not field['dflt_value'] and field['type'] == 'INTEGER' else ''}{' DEFAULT ' + str(field['dflt_value']) if field['dflt_value'] else ''}"

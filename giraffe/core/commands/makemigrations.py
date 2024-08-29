@@ -1,8 +1,7 @@
-from typing import Dict, Optional, List, Union
+from typing import Optional, List, Type
 
 from pathlib import Path
 
-from ..db.connections import execute_script
 from ..db.defaults import Migration
 from ..db.models import Model
 
@@ -11,7 +10,6 @@ import argparse
 import inspect
 import json
 import sys
-import os
 
 
 MIGRATIONS_DIR = Path.cwd() / 'migrations'
@@ -22,9 +20,8 @@ def add_arguments(parser: argparse.ArgumentParser):
 
 
 def execute(args):
-    # Get models and current version
-    models = _get_models()
-    version = _get_version()
+    version: Migration | None = _get_version()
+    models: List[Type[Model]] = _get_models()
 
     # Add migration table for initial migrations
     if not version:
@@ -40,29 +37,33 @@ def execute(args):
 
         return
     
-    if os.path.join(MIGRATIONS_DIR, migration_name):
+    if (MIGRATIONS_DIR / migration_name).exists():
         print(f"Run `giraffe migrate {migration_name.split('.')[0]}` first before you can initiate a new migration.")
 
         return
     
     MIGRATIONS_DIR.mkdir(exist_ok=True)
 
-    with open(os.path.join(MIGRATIONS_DIR, migration_name), 'w') as file:
-        schemas: list = []
+    schemas: list = []
 
-        for model in models:
-            model: Model
+    for model in models:
+        changes = model.get_schema_changes()
 
-            schema = model.get_schema_changes()
+        if changes:
+            schemas.append(changes)
 
-            schemas.append(schema)
+    if not changes:
+        print("No migrations available.")
 
+        return
+
+    with open(MIGRATIONS_DIR / migration_name, 'w') as file:
         json.dump(schemas, file, indent=4)
 
-    return
+    print(f"Migration {migration_name} generated successfully.")
 
 
-def _get_models() -> list:
+def _get_models() -> List[Type[Model]]:
     """
     Get all model class objects defined in models.py files at the custom framework app level.
     """
@@ -98,11 +99,11 @@ def _get_models() -> list:
 
 def _get_version() -> Optional[Migration]:
     """
-    Returns current database version.
+    Get the latest migration version.
     """
 
     try:
-        return Migration().latest('applied_at')
+        return Migration.query.latest('applied_at')
     
     except:
         return None

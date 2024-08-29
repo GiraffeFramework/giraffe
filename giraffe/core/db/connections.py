@@ -1,42 +1,49 @@
-from typing import List
-
+from typing import List, Tuple, Any
 import sqlite3
-
 
 conn = sqlite3.connect('db.sqlite3')
 cursor = conn.cursor()
 
 
-def change_db(action: str) -> List:
+def change_db(action: str) -> int:
     print('change_query: ', action)
 
     cursor.execute(action)
     conn.commit()
+    
+    if action.lower().startswith("insert"):
+        last_row_id = cursor.lastrowid
 
-    return []
+        return last_row_id if last_row_id else 0
+
+    return 0
 
 
-def query_all(query: str) -> List:
+def query_all(query: str) -> List[Tuple]:
     print('all_query: ', query)
 
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    print(rows)
+    print('all_query_result: ', rows)
 
     return rows
 
 
-def query_one(query: str) -> tuple:
+def query_one(query: str) -> Tuple:
     print('one_query: ', query)
 
     cursor.execute(query)
-    rows = cursor.fetchone()
+    row = cursor.fetchone()
 
-    print(rows)
+    print('one_query_result: ', row)
 
-    return rows
+    return row
 
+
+def get_column_names(query: str) -> List[str]:
+    cursor.execute(query)
+    return [description[0] for description in cursor.description]
 
 
 def execute_script(script: str) -> None:
