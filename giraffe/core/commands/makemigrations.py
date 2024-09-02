@@ -2,6 +2,8 @@ from typing import Optional, List, Type
 
 from pathlib import Path
 
+from sqlite3 import OperationalError
+
 from ..db.defaults import Migration
 from ..db.models import Model
 
@@ -52,7 +54,7 @@ def execute(args):
         if changes:
             schemas.append(changes)
 
-    if not changes:
+    if not schemas:
         print("No migrations available.")
 
         return
@@ -105,5 +107,5 @@ def _get_version() -> Optional[Migration]:
     try:
         return Migration.query.latest('applied_at')
     
-    except:
+    except OperationalError:
         return None

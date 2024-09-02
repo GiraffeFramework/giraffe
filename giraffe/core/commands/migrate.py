@@ -81,4 +81,13 @@ def _get_alter_statements(tablename: str, alterations: List[dict]) -> str:
 
 
 def _get_field(field: dict):
-    return f"{field['name']} {field['type']}{' NOT NULL' if field['notnull'] else ''}{' PRIMARY KEY' if field['pk'] else ''}{' AUTOINCREMENT' if field['pk'] and not field['dflt_value'] and field['type'] == 'INTEGER' else ''}{' DEFAULT ' + str(field['dflt_value']) if field['dflt_value'] else ''}"
+    field_data = f"{field['name']} {field['type']}"
+    field_data += ' NOT NULL' if field['notnull'] else ''
+
+    if field['pk']:
+        field_data += ' PRIMARY KEY'
+        field_data += ' AUTOINCREMENT' if not field['dflt_value'] and field['type'] == 'INTEGER' else ''
+        
+    field_data += ' DEFAULT ' + str(field['dflt_value']) if field['dflt_value'] else ''
+
+    return field_data

@@ -26,6 +26,7 @@ class Model:
     def __init__(self, body: Optional[Dict] = None, **kwargs) -> None:
         self._body: Optional[Dict] = body
         self.__tablename__: str = ''
+        self._column_names: List[str] = []
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -44,7 +45,10 @@ class Model:
         return name
     
     @classmethod
-    def _get_column_names(cls):
+    def _get_column_names(cls, bypass_cache: bool=False) -> List[str]:
+        if cls()._column_names and not bypass_cache:
+            return cls()._column_names
+
         names: List[str] = []
 
         for key, value in cls.__dict__.items():
@@ -52,6 +56,8 @@ class Model:
                 continue
 
             names.append(value.name)
+
+        cls()._column_names = names
 
         return names
     
@@ -121,6 +127,8 @@ class Model:
             return None
 
         print('schemas: ', alter_schemas)
+
+        cls()._get_column_names(True)
 
         return {"tablename" : cls().get_tablename(), "create" : [], "alter" : alter_schemas}
     
